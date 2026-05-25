@@ -1,116 +1,140 @@
-# CLAUDE.md — Javi Project
+# CLAUDE.md — SMASH CREW (Padel Landing Page)
 
 ## Project Overview
 
-Landing page built with **Next.js + TypeScript**. Design is minimalist and modern.
+Interactive 3D landing page for **SMASH CREW**, a friend padel group.
+The hero experience is a scroll-driven 3D animation: a white padel racket disassembles
+into flying pieces, reassembles, and explodes in snow particles. Built to look like
+those viral TikTok interactive websites.
 
 ## Tech Stack
 
-- **Framework**: Next.js 14+ (App Router)
-- **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS
-- **Package manager**: npm
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Next.js | 14.x | Framework (App Router) |
+| TypeScript | 5.x | Language (strict) |
+| React | 18.x | UI (required by R3F v8) |
+| `@react-three/fiber` | 8.x | React renderer for Three.js |
+| `@react-three/drei` | 9.x | R3F helpers (Environment, etc.) |
+| Three.js | 0.170.x | 3D engine |
+| Tailwind CSS | 3.x | Styling |
+
+> React 18 (not 19) is required — `@react-three/fiber` v8 has a peer dep on React `>=18 <19`.
+> Always install with `--legacy-peer-deps`.
 
 ## Directory Structure
 
 ```
 /
-├── app/                  # Next.js App Router pages and layouts
-│   ├── layout.tsx        # Root layout (fonts, metadata)
-│   ├── page.tsx          # Home / landing page
-│   └── globals.css       # Global styles
-├── components/           # Reusable UI components
-│   ├── ui/               # Primitive components (Button, Card, etc.)
-│   └── sections/         # Page sections (Hero, Features, etc.)
-├── lib/                  # Utility functions and helpers
-├── public/               # Static assets (images, icons, fonts)
-├── types/                # Shared TypeScript type definitions
-├── CLAUDE.md             # This file
-├── next.config.ts        # Next.js configuration
-├── tailwind.config.ts    # Tailwind configuration
-└── tsconfig.json         # TypeScript configuration
+├── app/
+│   ├── layout.tsx          # Root layout + metadata
+│   ├── page.tsx            # Main page — scroll progress tracking, dynamic import
+│   └── globals.css         # Tailwind base + custom scrollbar + selection color
+├── components/
+│   ├── PadelScene.tsx      # Canvas wrapper (localClippingEnabled: true)
+│   ├── PadelRacket.tsx     # 3D racket — geometry + scroll-driven disassembly
+│   ├── SnowExplosion.tsx   # THREE.Points particle burst on trigger
+│   ├── HeroOverlay.tsx     # Absolute text overlay on the canvas
+│   └── sections/
+│       ├── AboutSection.tsx
+│       ├── StatsSection.tsx
+│       ├── CrewSection.tsx
+│       └── CtaSection.tsx
+├── Footer.tsx
+├── next.config.mjs
+├── tailwind.config.ts
+├── tsconfig.json
+└── package.json
 ```
 
-## Development Workflow
+## Scroll Animation Architecture
 
-### Setup
-```bash
-npm install
-npm run dev       # Start dev server at http://localhost:3000
+The 3D hero runs in a **sticky canvas** pattern:
+
+```
+<div ref={containerRef} className="h-[500vh]">   ← 5× viewport of scroll space
+  <div className="sticky top-0 h-screen">        ← canvas stays in view
+    <PadelScene scrollProgress={0..1} />
+    <HeroOverlay scrollProgress={0..1} />
+  </div>
+</div>
 ```
 
-### Common commands
-```bash
-npm run build     # Production build
-npm run lint      # ESLint check
-npm run typecheck # tsc --noEmit
+`scrollProgress` is computed in `page.tsx` from the container's `getBoundingClientRect().top`.
+
+### Scroll stages in `PadelRacket.tsx`
+
+| scrollProgress | What happens |
+|---|---|
+| 0.00 – 0.06 | Racket scales in (0 → 1) |
+| 0.06 – 0.42 | Parts **explode** outward — `easeInOutCubic` |
+| 0.42 – 0.76 | Parts **reassemble** — `easeInOutCubic` reversed |
+| 0.76 – 1.00 | Assembled, slow Y-spin + hover bob |
+
+**Mouse parallax** is active during 0–0.76: group rotates with `state.mouse`.
+
+### Snow explosion (`SnowExplosion.tsx`)
+
+- 600 `THREE.Points` particles at origin
+- Triggered once when `scrollProgress >= 0.75` (guarded by `snowRef.current`)
+- Random velocities in all directions + upward bias
+- Gravity applied per frame (`-4.5 * delta`)
+- Material opacity fades 1 → 0 over 3 s, then live flag reset
+
+### Racket geometry (`PadelRacket.tsx`)
+
+The racket is built entirely from Three.js primitives — no external model:
+
+- **Frame**: `THREE.TubeGeometry` following a closed `CatmullRomCurve3` ellipse
+- **Face**: `THREE.ExtrudeGeometry` from a bezier `THREE.Shape` with oval holes
+- **Handle**: `THREE.CylinderGeometry`
+- **Grip band**: `THREE.CylinderGeometry` with green emissive material
+
+The face is rendered as **4 clipped quadrants** (TL/TR/BL/BR) so each quarter can fly
+independently. Requires `gl={{ localClippingEnabled: true }}` on the Canvas.
+
+### IMPORTANT: Material spread pattern
+
+```typescript
+// ✅ Correct — spread the params object, not the material instance
+const WHITE_PARAMS = { color: '...', metalness: 0.08, ... } as const
+const whiteMat = new THREE.MeshPhysicalMaterial(WHITE_PARAMS)
+// For variants:
+new THREE.MeshPhysicalMaterial({ ...WHITE_PARAMS, clippingPlanes: [...] })
 ```
-
-### Branch strategy
-- Work on feature branches: `feature/<name>` or `fix/<name>`
-- Main branch: `main`
-- Never push directly to `main`
-
-## Code Conventions
-
-### TypeScript
-- Always use explicit types for function parameters and return values
-- Prefer `interface` over `type` for object shapes
-- Use `const` by default; `let` only when reassignment is needed
-- No `any` — use `unknown` and narrow properly
-
-### React / Next.js
-- Use Server Components by default; add `"use client"` only when needed (interactivity, hooks)
-- Co-locate component styles with the component file using Tailwind classes
-- One component per file; filename matches the exported component name (PascalCase)
-- Keep pages thin — logic lives in components or `lib/`
-
-### Styling (Tailwind)
-- Mobile-first responsive design (`sm:`, `md:`, `lg:`)
-- Design tokens (colors, spacing, font sizes) configured in `tailwind.config.ts`
-- No inline `style={{}}` unless absolutely necessary
-
-### File naming
-- Components: `PascalCase.tsx` (e.g. `HeroSection.tsx`)
-- Utilities / helpers: `camelCase.ts` (e.g. `formatDate.ts`)
-- Pages: `page.tsx` inside the route folder
 
 ## Design System
 
-### Visual style
-- **Aesthetic**: Minimalist, modern, clean
-- **Whitespace**: Generous — let content breathe
-- **Typography**: Single font family, clear hierarchy (display → heading → body → caption)
-- **Color palette**: Neutral base with one accent color; avoid visual noise
+- **Background**: `#080808`
+- **Accent**: `#4ADE80` (Tailwind `green-400`)
+- **Text**: `#ffffff` at various opacities (40%, 45%, 60%)
+- **Font**: system-ui fallback (Inter if loaded)
+- **Aesthetic**: Minimalist dark, generous whitespace, bold typography
+- **Content max-width**: `max-w-5xl mx-auto px-6`
+- **Section padding**: `py-32`
 
-### Component patterns
-- Buttons have clear primary/secondary/ghost variants
-- Sections have consistent vertical padding (`py-16 md:py-24`)
-- Max content width: `max-w-6xl mx-auto px-4`
+## Development Commands
 
-## Landing Page Sections
-
-Define and build sections here as the project grows. Typical structure:
-
-1. **Hero** — headline, subheadline, CTA button
-2. **Features / Benefits** — 3–4 key value propositions
-3. **Social proof** — testimonials or logos (if applicable)
-4. **CTA** — final call to action
-5. **Footer** — links, copyright
-
-## Environment Variables
-
-```
-# .env.local (never commit this file)
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```bash
+npm install --legacy-peer-deps   # Always use this flag
+npm run dev                      # http://localhost:3000
+npm run build                    # Production build
+npm run typecheck                # tsc --noEmit
 ```
 
-## AI Assistant Guidelines
+## Key Constraints for AI Assistants
 
-- Follow the conventions above strictly — no deviations without asking
-- Do not add dependencies without confirming with the user
-- Prefer editing existing files over creating new ones
-- Keep components small and focused (single responsibility)
-- Run `npm run lint` and `npm run typecheck` before considering a task done
-- Do not add comments unless the "why" is non-obvious
-- Do not generate placeholder lorem ipsum content in production code — ask for real copy
+1. **Never upgrade to React 19** — breaks `@react-three/fiber` v8 peer dep
+2. **Always use `--legacy-peer-deps`** for any `npm install`
+3. **Canvas must have `gl={{ localClippingEnabled: true }}`** for face clipping to work
+4. **`PadelScene` must be dynamically imported with `ssr: false`** — Three.js needs the browser
+5. **Do not add comments** unless the "why" is non-obvious
+6. **Do not install new packages** without confirming with the user
+7. Run `npm run build` before considering any task done
+
+## Content (Fake club — customize freely)
+
+- **Club name**: SMASH CREW
+- **Tagline**: "We came for the pádel. We stayed for the vibe."
+- **Members**: Carlos (El Toro), Javi (Revés), Marta (Smash Queen), Pablo (Bolea), Sofía (La Pared), Andrés (Lob)
+- **Stats**: 247 games, 3 rackets broken, 6 friends
