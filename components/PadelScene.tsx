@@ -2,7 +2,7 @@
 
 import { Canvas } from '@react-three/fiber'
 import { Suspense } from 'react'
-import { Environment } from '@react-three/drei'
+
 import PadelRacket from './PadelRacket'
 import SnowExplosion from './SnowExplosion'
 
@@ -29,7 +29,7 @@ export default function PadelScene({ scrollProgress, snowTriggered }: PadelScene
         <PadelRacket scrollProgress={scrollProgress} />
         <SnowExplosion triggered={snowTriggered} />
 
-        <Environment preset="studio" background={false} />
+        <pointLight position={[0, -3, -3]} color="#1a1a2e" intensity={2} />
       </Suspense>
     </Canvas>
   )

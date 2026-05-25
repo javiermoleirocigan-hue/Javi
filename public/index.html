@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SMASH CREW — We Ball Different</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:#080808;color:#fff;font-family:'Inter',system-ui,sans-serif;overflow-x:hidden}
+  ::selection{background:#4ADE80;color:#080808}
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-track{background:#111}
+  ::-webkit-scrollbar-thumb{background:#4ADE80;border-radius:2px}
+  #canvas-container{position:sticky;top:0;height:100vh;width:100%;overflow:hidden}
+  #hero-canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+  #hero-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+  .scroll-hint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem}
+  .scroll-line{width:1px;height:2.5rem;background:linear-gradient(to bottom,rgba(255,255,255,.4),transparent);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.08)}
+  @media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+  .crew-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+  @media(max-width:900px){.crew-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.crew-grid{grid-template-columns:1fr}}
+  .card{border:1px solid rgba(255,255,255,.08);border-radius:1rem;padding:1.5rem;background:rgba(255,255,255,.02);transition:border-color .3s}
+  .card:hover{border-color:rgba(74,222,128,.4)}
+  .progress-bar{height:4px;border-radius:9999px;background:rgba(255,255,255,.1);overflow:hidden}
+  .progress-fill{height:100%;border-radius:9999px;background:#4ADE80}
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+  @media(max-width:768px){.about-grid{grid-template-columns:1fr}}
+  .btn-primary{padding:.9rem 2.5rem;background:#4ADE80;color:#080808;font-weight:900;border-radius:9999px;font-size:1.1rem;border:none;cursor:pointer;transition:background .2s}
+  .btn-primary:hover{background:#fff}
+  .btn-secondary{padding:.9rem 2.5rem;border:1px solid rgba(255,255,255,.2);color:#fff;font-weight:700;border-radius:9999px;font-size:1.1rem;background:transparent;cursor:pointer;transition:border-color .2s}
+  .btn-secondary:hover{border-color:rgba(255,255,255,.6)}
+</style>
+<script>tailwind.config={theme:{extend:{colors:{accent:'#4ADE80'}}}}</script>
+</head>
+<body>
+
+<!-- ==================== 3D SCROLL SECTION ==================== -->
+<div id="scroll-driver" style="height:500vh;position:relative">
+  <div id="canvas-container">
+    <canvas id="hero-canvas"></canvas>
+    <div id="hero-overlay">
+      <div id="title-block" style="text-align:center;transition:opacity .15s,transform .15s">
+        <h1 style="font-size:clamp(3rem,12vw,9rem);font-weight:900;line-height:1;letter-spacing:-.04em;text-transform:uppercase">
+          SMASH<br><span style="color:#4ADE80">CREW</span>
+        </h1>
+        <p id="subtitle" style="margin-top:1rem;font-size:clamp(.9rem,2vw,1.2rem);color:rgba(255,255,255,.55);letter-spacing:.3em;text-transform:uppercase;font-weight:300">
+          We came for the pádel. We stayed for the vibe.
+        </p>
+      </div>
+      <div class="scroll-hint" id="scroll-hint">
+        <span style="color:rgba(255,255,255,.35);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase">Scroll</span>
+        <div class="scroll-line"></div>
+      </div>
+      <div id="assembling-text" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none">
+        <p style="font-size:clamp(1rem,3vw,1.5rem);color:rgba(255,255,255,.45);letter-spacing:.4em;text-transform:uppercase;font-weight:300">Volviendo a casa...</p>
+      </div>
+      <div id="boom-text" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none">
+        <p style="font-size:clamp(4rem,18vw,14rem);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;text-shadow:0 0 80px #4ADE80,0 0 40px #4ADE80">BOOM</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ABOUT ==================== -->
+<section style="padding:8rem 1.5rem;max-width:64rem;margin:0 auto">
+  <div class="about-grid">
+    <div>
+      <p style="color:#4ADE80;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;font-weight:500;margin-bottom:1rem">Nuestra historia</p>
+      <h2 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:900;line-height:1.1;letter-spacing:-.03em;margin-bottom:1.5rem">
+        Empezamos con<br>
+        <span style="color:rgba(255,255,255,.25)">una pista</span> y<br>
+        mucha actitud.
+      </h2>
+      <p style="color:rgba(255,255,255,.5);font-size:1.1rem;line-height:1.7">
+        Todo empezó un domingo lluvioso de octubre. Seis amigos, una pista reservada
+        y cero idea de cómo dar una bandeja decente. Tres temporadas después, seguimos
+        siendo igual de malos. Pero lo pasamos infinitamente mejor.
+      </p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div class="card">
+        <div style="display:flex;gap:1.25rem">
+          <span style="color:#4ADE80;font-weight:900;font-size:.85rem;margin-top:.1rem;flex-shrink:0">01</span>
+          <div><h3 style="font-weight:700;margin-bottom:.25rem">Jugar</h3><p style="color:rgba(255,255,255,.45);font-size:.9rem;line-height:1.6">Cada fin de semana, llueva o truene. Las excusas las dejamos fuera de la pista.</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;gap:1.25rem">
+          <span style="color:#4ADE80;font-weight:900;font-size:.85rem;margin-top:.1rem;flex-shrink:0">02</span>
+          <div><h3 style="font-weight:700;margin-bottom:.25rem">Aprender</h3><p style="color:rgba(255,255,255,.45);font-size:.9rem;line-height:1.6">Videos de YouTube a las 2 de la mañana y bandeja que sigue sin entrar.</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;gap:1.25rem">
+          <span style="color:#4ADE80;font-weight:900;font-size:.85rem;margin-top:.1rem;flex-shrink:0">03</span>
+          <div><h3 style="font-weight:700;margin-bottom:.25rem">Reír</h3><p style="color:rgba(255,255,255,.45);font-size:.9rem;line-height:1.6">Porque si no te ríes de tus propios errores, alguien lo hará por ti.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== STATS ==================== -->
+<section style="border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)">
+  <div class="stat-grid">
+    <div style="background:#080808;padding:3rem 2rem;text-align:center">
+      <p style="font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:#4ADE80;line-height:1;margin-bottom:.5rem">247</p>
+      <p style="color:rgba(255,255,255,.4);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase">Partidos jugados</p>
+    </div>
+    <div style="background:#080808;padding:3rem 2rem;text-align:center">
+      <p style="font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:#4ADE80;line-height:1;margin-bottom:.5rem">3</p>
+      <p style="color:rgba(255,255,255,.4);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase">Raquetas rotas</p>
+    </div>
+    <div style="background:#080808;padding:3rem 2rem;text-align:center">
+      <p style="font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:#4ADE80;line-height:1;margin-bottom:.5rem">∞</p>
+      <p style="color:rgba(255,255,255,.4);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase">Bandejas falladas</p>
+    </div>
+    <div style="background:#080808;padding:3rem 2rem;text-align:center">
+      <p style="font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:#4ADE80;line-height:1;margin-bottom:.5rem">6</p>
+      <p style="color:rgba(255,255,255,.4);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase">Amigos para siempre</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CREW ==================== -->
+<section style="padding:8rem 1.5rem;max-width:64rem;margin:0 auto">
+  <div style="margin-bottom:4rem">
+    <p style="color:#4ADE80;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;font-weight:500;margin-bottom:1rem">El equipo</p>
+    <h2 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:900;letter-spacing:-.03em">Conoce a la banda</h2>
+  </div>
+  <div class="crew-grid">
+    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">🐂</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Carlos</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"El Toro"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Potencia bruta</p><div class="progress-bar"><div class="progress-fill" style="width:79%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">89W</span></div>
+    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">🎯</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Javi</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"Revés"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Técnica cuestionable</p><div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">74W</span></div>
+    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">👑</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Marta</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"Smash Queen"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Dominadora de la red</p><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">112W</span></div>
+    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">🧱</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Pablo</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"Bolea"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Defensa imposible</p><div class="progress-bar"><div class="progress-fill" style="width:61%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">68W</span></div>
+    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">🪃</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Sofía</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"La Pared"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Recupera todo</p><div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">95W</span></div>
+    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">🎈</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Andrés</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"Lob"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Especialista en globos</p><div class="progress-bar"><div class="progress-fill" style="width:46%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">51W</span></div>
+  </div>
+</section>
+
+<!-- ==================== CTA ==================== -->
+<section style="padding:8rem 1.5rem;text-align:center">
+  <div style="max-width:48rem;margin:0 auto">
+    <p style="color:#4ADE80;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;font-weight:500;margin-bottom:1.5rem">¿Te atreves?</p>
+    <h2 style="font-size:clamp(2.5rem,7vw,5rem);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:2rem">
+      Crees que puedes<br><span style="color:rgba(255,255,255,.22)">seguir el ritmo?</span>
+    </h2>
+    <p style="color:rgba(255,255,255,.4);font-size:1.1rem;margin-bottom:3rem;line-height:1.7;max-width:36rem;margin-left:auto;margin-right:auto">
+      No hace falta que seas bueno. Hace falta que tengas ganas. Reserva una pista y demuéstralo.
+    </p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <button class="btn-primary">Únete al crew</button>
+      <button class="btn-secondary">Ver próximas pistas</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer style="padding:3rem 1.5rem;border-top:1px solid rgba(255,255,255,.08)">
+  <div style="max-width:64rem;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+    <span style="font-size:1.25rem;font-weight:900;letter-spacing:-.03em">SMASH<span style="color:#4ADE80">CREW</span></span>
+    <p style="color:rgba(255,255,255,.22);font-size:.85rem">© 2025 — Hecho con amor y bandeja fallada</p>
+    <div style="display:flex;gap:1.5rem">
+      <a href="#" style="color:rgba(255,255,255,.3);font-size:.9rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.3)'">Instagram</a>
+      <a href="#" style="color:rgba(255,255,255,.3);font-size:.9rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.3)'">WhatsApp</a>
+      <a href="#" style="color:rgba(255,255,255,.3);font-size:.9rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.3)'">Reservar</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ==================== 3D ENGINE ==================== -->
+<script>
+(function() {
+  const canvas = document.getElementById('hero-canvas')
+  const scrollDriver = document.getElementById('scroll-driver')
+  const titleBlock = document.getElementById('title-block')
+  const subtitle = document.getElementById('subtitle')
+  const scrollHint = document.getElementById('scroll-hint')
+  const assemblingText = document.getElementById('assembling-text')
+  const boomText = document.getElementById('boom-text')
+
+  // ---- Scene Setup ----
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.localClippingEnabled = true
+  renderer.setClearColor(0x000000, 0)
+
+  const scene = new THREE.Scene()
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100)
+  camera.position.set(0, 0, 5)
+
+  function resize() {
+    const w = canvas.parentElement.clientWidth
+    const h = canvas.parentElement.clientHeight
+    renderer.setSize(w, h)
+    camera.aspect = w / h
+    camera.updateProjectionMatrix()
+  }
+  resize()
+  window.addEventListener('resize', resize)
+
+  // ---- Lights ----
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7))
+  const dirLight = new THREE.DirectionalLight(0xffffff, 2)
+  dirLight.position.set(4, 6, 4)
+  scene.add(dirLight)
+  const backLight = new THREE.DirectionalLight(0xa0c0ff, 0.5)
+  backLight.position.set(-4, -2, -2)
+  scene.add(backLight)
+  const greenLight = new THREE.PointLight(0x4ADE80, 3, 20)
+  greenLight.position.set(0, 3, 3)
+  scene.add(greenLight)
+
+  // ---- Materials ----
+  const whiteMat = new THREE.MeshPhysicalMaterial({
+    color: 0xF2F2F8, metalness: 0.08, roughness: 0.18,
+    clearcoat: 0.6, clearcoatRoughness: 0.1
+  })
+  const handleMat = new THREE.MeshPhysicalMaterial({
+    color: 0x111111, metalness: 0.6, roughness: 0.3
+  })
+  const gripMat = new THREE.MeshPhysicalMaterial({
+    color: 0x4ADE80, metalness: 0.3, roughness: 0.2,
+    emissive: 0x4ADE80, emissiveIntensity: 0.5
+  })
+  const faceMats = [
+    new THREE.MeshPhysicalMaterial({ color:0xF0F0FF, metalness:0.05, roughness:0.3, clippingPlanes:[new THREE.Plane(new THREE.Vector3(1,0,0),0),new THREE.Plane(new THREE.Vector3(0,-1,0),0)] }),
+    new THREE.MeshPhysicalMaterial({ color:0xF0F0FF, metalness:0.05, roughness:0.3, clippingPlanes:[new THREE.Plane(new THREE.Vector3(-1,0,0),0),new THREE.Plane(new THREE.Vector3(0,-1,0),0)] }),
+    new THREE.MeshPhysicalMaterial({ color:0xF0F0FF, metalness:0.05, roughness:0.3, clippingPlanes:[new THREE.Plane(new THREE.Vector3(1,0,0),0),new THREE.Plane(new THREE.Vector3(0,1,0),0)] }),
+    new THREE.MeshPhysicalMaterial({ color:0xF0F0FF, metalness:0.05, roughness:0.3, clippingPlanes:[new THREE.Plane(new THREE.Vector3(-1,0,0),0),new THREE.Plane(new THREE.Vector3(0,1,0),0)] }),
+  ]
+
+  // ---- Racket Geometry ----
+  function buildFaceShape() {
+    const shape = new THREE.Shape()
+    shape.moveTo(0, 0.88)
+    shape.bezierCurveTo(0.58, 0.88, 0.63, 0.42, 0.63, 0)
+    shape.bezierCurveTo(0.63, -0.38, 0.48, -0.60, 0, -0.66)
+    shape.bezierCurveTo(-0.48, -0.60, -0.63, -0.38, -0.63, 0)
+    shape.bezierCurveTo(-0.63, 0.42, -0.58, 0.88, 0, 0.88)
+    for (let row = -2; row <= 3; row++) {
+      const off = row % 2 === 0 ? 0 : 0.1
+      for (let col = -2; col <= 2; col++) {
+        const x = col * 0.22 + off, y = row * 0.2 + 0.08
+        const nx = x / 0.52, ny = (y - 0.1) / 0.72
+        if (nx*nx + ny*ny < 0.88) {
+          const hole = new THREE.Path()
+          hole.absarc(x, y, 0.065, 0, Math.PI*2, false)
+          shape.holes.push(hole)
+        }
+      }
+    }
+    return shape
+  }
+
+  function buildFrameGeom() {
+    const pts = []
+    for (let i = 0; i <= 80; i++) {
+      const a = (i/80)*Math.PI*2
+      pts.push(new THREE.Vector3(Math.cos(a)*0.66, Math.sin(a)*0.9+0.05, 0))
+    }
+    const curve = new THREE.CatmullRomCurve3(pts, true)
+    return new THREE.TubeGeometry(curve, 80, 0.042, 8, true)
+  }
+
+  const faceGeom = new THREE.ExtrudeGeometry(buildFaceShape(), {
+    depth:0.05, bevelEnabled:true, bevelSize:0.012, bevelThickness:0.012, bevelSegments:2
+  })
+
+  // ---- Racket Group ----
+  const racketGroup = new THREE.Group()
+  scene.add(racketGroup)
+
+  const frameMesh = new THREE.Mesh(buildFrameGeom(), whiteMat)
+  const handleMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.086,0.76,14), handleMat)
+  handleMesh.position.y = -1.42
+  const gripMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.112,0.112,0.32,14), gripMat)
+  gripMesh.position.y = -1.18
+  const faceTL = new THREE.Mesh(faceGeom, faceMats[0])
+  const faceTR = new THREE.Mesh(faceGeom, faceMats[1])
+  const faceBL = new THREE.Mesh(faceGeom, faceMats[2])
+  const faceBR = new THREE.Mesh(faceGeom, faceMats[3])
+  const faceParts = [faceTL, faceTR, faceBL, faceBR]
+  faceParts.forEach(f => { f.position.z = 0.02 })
+
+  racketGroup.add(frameMesh, handleMesh, gripMesh, faceTL, faceTR, faceBL, faceBR)
+
+  // ---- Exploded targets ----
+  const EXPLODED = {
+    frame:  { p:[3.2, 1.8,-0.8], r:[0.2, 0.9, 0.4] },
+    handle: { p:[0.5,-4.0, 1.2], r:[0.5, 0.1, 0.3] },
+    faceTL: { p:[-2.8, 2.8, 1.6], r:[0.4,-0.6, 0.5] },
+    faceTR: { p:[ 2.8, 2.8,-1.4], r:[-0.3, 0.7,-0.4] },
+    faceBL: { p:[-2.6,-2.2,-1.8], r:[0.6, 0.4,-0.3] },
+    faceBR: { p:[ 2.6,-2.2, 1.4], r:[-0.5,-0.3, 0.6] },
+  }
+  const ASSEMBLED = {
+    frame:  { p:[0, 0.05, 0], r:[0,0,0] },
+    handle: { p:[0,-1.42, 0], r:[0,0,0] },
+    faceTL: { p:[0, 0, 0.02], r:[0,0,0] },
+    faceTR: { p:[0, 0, 0.02], r:[0,0,0] },
+    faceBL: { p:[0, 0, 0.02], r:[0,0,0] },
+    faceBR: { p:[0, 0, 0.02], r:[0,0,0] },
+  }
+
+  function eio(t) { return t < .5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2 }
+
+  function applyLerp(mesh, key, t) {
+    const a = ASSEMBLED[key], e = EXPLODED[key]
+    mesh.position.set(
+      a.p[0]+(e.p[0]-a.p[0])*t, a.p[1]+(e.p[1]-a.p[1])*t, a.p[2]+(e.p[2]-a.p[2])*t
+    )
+    mesh.rotation.set(
+      a.r[0]+(e.r[0]-a.r[0])*t, a.r[1]+(e.r[1]-a.r[1])*t, a.r[2]+(e.r[2]-a.r[2])*t
+    )
+  }
+
+  // ---- Snow Particles ----
+  const SNOW = 600
+  const snowPos = new Float32Array(SNOW*3)
+  const snowVel = new Float32Array(SNOW*3)
+  const snowGeom = new THREE.BufferGeometry()
+  snowGeom.setAttribute('position', new THREE.BufferAttribute(snowPos, 3))
+  const snowMat = new THREE.PointsMaterial({ color:0xffffff, size:0.07, transparent:true, opacity:0, sizeAttenuation:true, depthWrite:false })
+  const snowPoints = new THREE.Points(snowGeom, snowMat)
+  scene.add(snowPoints)
+  let snowLive = false, snowTime = 0
+
+  function triggerSnow() {
+    if (snowLive) return
+    snowLive = true; snowTime = 0
+    for (let i=0; i<SNOW; i++) {
+      const theta = Math.random()*Math.PI*2, phi = Math.acos(2*Math.random()-1)
+      const speed = 1.5+Math.random()*5
+      snowVel[i*3]   = Math.sin(phi)*Math.cos(theta)*speed
+      snowVel[i*3+1] = Math.sin(phi)*Math.sin(theta)*speed+1.5
+      snowVel[i*3+2] = Math.cos(phi)*speed*.5
+      snowPos[i*3]=(Math.random()-.5)*.3; snowPos[i*3+1]=(Math.random()-.5)*.3; snowPos[i*3+2]=(Math.random()-.5)*.3
+    }
+    snowGeom.attributes.position.needsUpdate = true
+    snowMat.opacity = 1
+  }
+
+  // ---- Mouse parallax ----
+  const mouse = { x: 0, y: 0 }
+  window.addEventListener('mousemove', e => {
+    mouse.x = (e.clientX/window.innerWidth-.5)*2
+    mouse.y = -(e.clientY/window.innerHeight-.5)*2
+  })
+
+  // ---- Scroll progress ----
+  let scrollProgress = 0
+  let snowFired = false
+
+  window.addEventListener('scroll', () => {
+    const el = scrollDriver
+    const top = el.getBoundingClientRect().top
+    const height = el.offsetHeight - window.innerHeight
+    scrollProgress = Math.max(0, Math.min(1, -top / height))
+    if (scrollProgress >= 0.75 && !snowFired) { snowFired = true; triggerSnow() }
+  }, { passive: true })
+
+  // ---- Main loop ----
+  let lastTime = performance.now()
+  function animate(now) {
+    requestAnimationFrame(animate)
+    const delta = Math.min((now - lastTime) / 1000, 0.1)
+    lastTime = now
+    const t = performance.now() / 1000
+    const s = scrollProgress
+
+    // Compute explode factor
+    let explodeT = 0, scale = 1
+
+    if (s < 0.06) {
+      scale = eio(s / 0.06); explodeT = 0
+    } else if (s < 0.42) {
+      scale = 1; explodeT = eio((s-0.06)/0.36)
+    } else if (s < 0.76) {
+      scale = 1; explodeT = 1-eio((s-0.42)/0.34)
+    } else {
+      scale = 1; explodeT = 0
+      racketGroup.rotation.y = t * 0.4
+      racketGroup.position.y = Math.sin(t*0.8)*0.06
+    }
+
+    racketGroup.scale.setScalar(scale)
+
+    if (s < 0.76) {
+      racketGroup.rotation.x = mouse.y * 0.12
+      racketGroup.rotation.y = mouse.x * 0.15
+      racketGroup.position.y = Math.sin(t*1.2)*0.04
+    }
+
+    applyLerp(frameMesh, 'frame', explodeT)
+    applyLerp(handleMesh, 'handle', explodeT)
+    applyLerp(gripMesh, 'handle', explodeT) // grip follows handle
+    applyLerp(faceTL, 'faceTL', explodeT)
+    applyLerp(faceTR, 'faceTR', explodeT)
+    applyLerp(faceBL, 'faceBL', explodeT)
+    applyLerp(faceBR, 'faceBR', explodeT)
+
+    // Snow
+    if (snowLive) {
+      snowTime += delta
+      for (let i=0; i<SNOW; i++) {
+        snowVel[i*3+1] -= 4.5*delta
+        snowPos[i*3]   += snowVel[i*3]*delta
+        snowPos[i*3+1] += snowVel[i*3+1]*delta
+        snowPos[i*3+2] += snowVel[i*3+2]*delta
+      }
+      snowGeom.attributes.position.needsUpdate = true
+      snowMat.opacity = Math.max(0, 1-snowTime/3)
+      if (snowTime > 3.5) snowLive = false
+    }
+
+    // UI overlays
+    const titleOpacity = s < 0.05 ? s/0.05 : s < 0.08 ? 1 : Math.max(0, 1-(s-0.08)/0.06)
+    titleBlock.style.opacity = titleOpacity
+    titleBlock.style.transform = `translateY(${(1-titleOpacity)*20}px)`
+    scrollHint.style.opacity = s < 0.03 ? s/0.03 : s > 0.08 ? 0 : 1-(s-0.03)/0.05
+
+    const assT = s > 0.44 && s < 0.72 ? Math.min(1, Math.min((s-0.44)/0.06,(0.72-s)/0.06)) : 0
+    assemblingText.style.opacity = assT
+
+    const boomT = s > 0.74 && s < 0.82 ? Math.min(1, Math.min((s-0.74)/0.03,(0.82-s)/0.04)) : 0
+    boomText.style.opacity = boomT
+
+    renderer.render(scene, camera)
+  }
+  animate(performance.now())
+})()
+</script>
+</body>
+</html>
