@@ -535,20 +535,79 @@
 
     /* ── RESERVIERUNG ── */
     #reservierung {
-      background: linear-gradient(135deg, #0f0a00, #0a0606, var(--dark));
-      text-align: center; padding: 80px 40px;
+      background: linear-gradient(135deg, #0d0800, #080808);
+      text-align: center; padding: 90px 40px;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
-    .reserve-inner {
-      max-width: 640px; margin: 0 auto;
-    }
+    .reserve-inner { max-width: 680px; margin: 0 auto; }
     .reserve-title {
       font-family: var(--font-display);
-      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-size: clamp(2.2rem, 5.5vw, 4rem);
       letter-spacing: .04em; margin-bottom: 14px;
     }
-    .reserve-sub { font-size: .95rem; color: var(--muted); margin-bottom: 36px; line-height: 1.7; }
+    .reserve-sub { font-size: .97rem; color: var(--muted); margin-bottom: 40px; line-height: 1.75; }
+    .reserve-form {
+      display: flex; flex-direction: column; gap: 14px;
+      text-align: left; margin-bottom: 28px;
+    }
+    .reserve-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 520px) { .reserve-row { grid-template-columns: 1fr; } }
+    .reserve-field {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .reserve-field label {
+      font-size: .68rem; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .reserve-field input,
+    .reserve-field select,
+    .reserve-field textarea {
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      border-radius: 5px; padding: 12px 14px;
+      color: var(--text); font-family: var(--font-body);
+      font-size: .9rem; outline: none;
+      transition: border-color .2s;
+      width: 100%;
+    }
+    .reserve-field input:focus,
+    .reserve-field select:focus,
+    .reserve-field textarea:focus { border-color: var(--gold); }
+    .reserve-field select option { background: #181818; }
+    .reserve-field textarea { resize: vertical; min-height: 80px; }
+    .reserve-submit {
+      width: 100%; padding: 16px;
+      background: var(--fire); color: #fff;
+      font-family: var(--font-body); font-size: .82rem;
+      font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; border-radius: 5px;
+      cursor: pointer; border: none;
+      transition: opacity .2s, transform .15s;
+    }
+    .reserve-submit:hover { opacity: .85; transform: translateY(-2px); }
+    .reserve-divider {
+      display: flex; align-items: center; gap: 16px;
+      font-size: .72rem; color: var(--muted);
+      letter-spacing: .1em; text-transform: uppercase;
+      margin: 6px 0;
+    }
+    .reserve-divider::before,
+    .reserve-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .reserve-alts { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .reserve-alt-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 22px; border-radius: 5px;
+      font-size: .76rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      transition: transform .15s, opacity .2s;
+    }
+    .reserve-alt-btn:hover { transform: translateY(-2px); opacity: .85; }
+    .btn-wa { background: #25D366; color: #fff; }
+    .btn-tel2 { background: rgba(255,255,255,.07); color: var(--text); border: 1px solid var(--border); }
 
     /* ── CTA FINAL ── */
     #cta-final {
@@ -632,6 +691,7 @@
   <a href="#speisekarte" class="mobile-link">Speisekarte</a>
   <a href="#galerie" class="mobile-link">Galerie</a>
   <a href="#location" class="mobile-link">Standort</a>
+  <a href="#reservierung" class="mobile-link">Reservieren</a>
   <a href="https://www.foodora.at/" target="_blank" rel="noopener" style="color:var(--gold);">Jetzt bestellen ↗</a>
 </div>
 
@@ -643,6 +703,7 @@
     <li><a href="#speisekarte">Speisekarte</a></li>
     <li><a href="#galerie">Galerie</a></li>
     <li><a href="#location">Standort</a></li>
+    <li><a href="#reservierung">Reservieren</a></li>
   </ul>
   <a href="https://www.foodora.at/" target="_blank" rel="noopener" class="nav-cta desktop">Bestellen ↗</a>
   <div class="nav-hamburger" id="menu-toggle" role="button" tabindex="0" aria-label="Menü">
@@ -1087,16 +1148,86 @@
   </div>
 </section>
 
+<!-- ══ RESERVIERUNG ══ -->
+<section id="reservierung">
+  <div class="reserve-inner">
+    <p class="section-label reveal">Tisch reservieren</p>
+    <h2 class="reserve-title reveal">Reservierung</h2>
+    <p class="reserve-sub reveal">Sichere dir deinen Tisch – besonders am Wochenende empfehlen wir eine Reservierung. Einfach Formular ausfüllen oder direkt anrufen.</p>
+
+    <form class="reserve-form reveal" id="reserve-form" onsubmit="handleReserve(event)">
+      <div class="reserve-row">
+        <div class="reserve-field">
+          <label for="r-name">Name</label>
+          <input type="text" id="r-name" name="name" placeholder="Dein Name" required />
+        </div>
+        <div class="reserve-field">
+          <label for="r-phone">Telefon / WhatsApp</label>
+          <input type="tel" id="r-phone" name="phone" placeholder="+43 ..." required />
+        </div>
+      </div>
+      <div class="reserve-row">
+        <div class="reserve-field">
+          <label for="r-date">Datum</label>
+          <input type="date" id="r-date" name="date" required />
+        </div>
+        <div class="reserve-field">
+          <label for="r-time">Uhrzeit</label>
+          <select id="r-time" name="time" required>
+            <option value="" disabled selected>Uhrzeit wählen</option>
+            <option>11:00</option><option>11:30</option>
+            <option>12:00</option><option>12:30</option>
+            <option>13:00</option><option>13:30</option>
+            <option>14:00</option><option>14:30</option>
+            <option>15:00</option><option>15:30</option>
+            <option>16:00</option><option>16:30</option>
+            <option>17:00</option><option>17:30</option>
+            <option>18:00</option><option>18:30</option>
+            <option>19:00</option><option>19:30</option>
+            <option>20:00</option><option>20:30</option>
+            <option>21:00</option><option>21:30</option>
+          </select>
+        </div>
+      </div>
+      <div class="reserve-field">
+        <label for="r-persons">Anzahl Personen</label>
+        <select id="r-persons" name="persons" required>
+          <option value="" disabled selected>Personen wählen</option>
+          <option>1 Person</option><option>2 Personen</option>
+          <option>3 Personen</option><option>4 Personen</option>
+          <option>5 Personen</option><option>6 Personen</option>
+          <option>7+ Personen (Gruppenanfrage)</option>
+        </select>
+      </div>
+      <div class="reserve-field">
+        <label for="r-note">Anmerkungen (optional)</label>
+        <textarea id="r-note" name="note" placeholder="Besondere Wünsche, Allergien, Anlass..."></textarea>
+      </div>
+      <button type="submit" class="reserve-submit">Tisch anfragen ↗</button>
+    </form>
+
+    <div class="reserve-divider">oder direkt kontaktieren</div>
+    <div class="reserve-alts">
+      <a href="https://wa.me/436769020841?text=Hallo%2C%20ich%20m%C3%B6chte%20einen%20Tisch%20reservieren." target="_blank" rel="noopener" class="reserve-alt-btn btn-wa">
+        💬 WhatsApp
+      </a>
+      <a href="tel:+436769020841" class="reserve-alt-btn btn-tel2">
+        📞 Anrufen
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- ══ CTA FINAL ══ -->
 <section id="cta-final">
   <h2 class="cta-big reveal">Hungrig?<br />Komm vorbei.</h2>
   <p class="cta-sub reveal">Oder bestell direkt auf foodora – frisch gegrillt, schnell geliefert.</p>
   <div class="cta-btns reveal">
     <a href="https://www.foodora.at/" target="_blank" rel="noopener" class="btn-icon btn-foodora">🛵 Auf foodora bestellen</a>
+    <a href="#reservierung" class="btn-icon btn-reserve">🗓️ Tisch reservieren</a>
     <!-- AQUÍ VA: @ de Instagram cuando el cliente lo facilite -->
     <!-- <a href="https://www.instagram.com/HANDLE" target="_blank" rel="noopener" class="btn-icon btn-instagram">📸 Instagram</a> -->
     <a href="tel:+436769020841" class="btn-icon btn-phone">📞 +43 676 9020841</a>
-    <a href="https://maps.google.com/?q=Kardinalplatz+8,+9020+Klagenfurt" target="_blank" rel="noopener" class="btn-icon btn-reserve">📍 Anfahrt</a>
   </div>
 </section>
 
@@ -1256,6 +1387,20 @@
     gsap.to('.hero-bg', { yPercent: 22, ease: 'none',
       scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true } });
   }
+
+  /* reservation form → WhatsApp */
+  window.handleReserve = function(e) {
+    e.preventDefault();
+    const f = e.target;
+    const name    = f.querySelector('#r-name').value;
+    const phone   = f.querySelector('#r-phone').value;
+    const date    = f.querySelector('#r-date').value;
+    const time    = f.querySelector('#r-time').value;
+    const persons = f.querySelector('#r-persons').value;
+    const note    = f.querySelector('#r-note').value;
+    const msg = `Hallo Top Burger! Ich möchte einen Tisch reservieren.\n\n👤 Name: ${name}\n📅 Datum: ${date} um ${time} Uhr\n👥 Personen: ${persons}\n📞 Rückruf: ${phone}${note ? '\n📝 Anmerkung: ' + note : ''}`;
+    window.open('https://wa.me/436769020841?text=' + encodeURIComponent(msg), '_blank');
+  };
 
   /* smooth anchor links */
   document.querySelectorAll('a[href^="#"]').forEach(a => {
