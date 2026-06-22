@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Top Burger Klagenfurt – Taste the Difference. Klagenfurts beste Burger, frisch gegrillt. Täglich 11–22 Uhr, Kardinalplatz 8." />
+  <title>Top Burger Klagenfurt – Taste the Difference</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold:  #D4A017;
+      --gold2: #F5C842;
+      --red:   #CC1F1F;
+      --fire:  linear-gradient(135deg, #CC1F1F, #D4A017);
+      --dark:  #080808;
+      --card:  #0F0F0F;
+      --border: rgba(212,160,23,0.13);
+      --text:  #F5F0E8;
+      --muted: rgba(245,240,232,0.48);
+      --FD: 'Bebas Neue', sans-serif;
+      --FB: 'Inter', sans-serif;
+    }
+    html { scroll-behavior: auto; }
+    body { background: var(--dark); color: var(--text); font-family: var(--FB); overflow-x: hidden; cursor: none; line-height: 1.6; }
+    @media (hover:none) { body { cursor: auto; } }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+
+    /* CURSOR */
+    #cur, #cur-r {
+      position: fixed; top: 0; left: 0; border-radius: 50%;
+      pointer-events: none; z-index: 9999; transform: translate(-50%,-50%);
+    }
+    #cur { width: 10px; height: 10px; background: var(--gold); mix-blend-mode: exclusion; transition: width .18s, height .18s; }
+    #cur-r { width: 38px; height: 38px; border: 1.5px solid rgba(212,160,23,.5); z-index: 9998; transition: left .2s ease, top .2s ease, width .2s, height .2s; }
+    body.ch #cur  { width: 18px; height: 18px; }
+    body.ch #cur-r { width: 54px; height: 54px; }
+    @media (hover:none) { #cur, #cur-r { display: none; } }
+
+    /* PROGRESS */
+    #prog { position: fixed; top: 0; left: 0; width: 0; height: 3px; background: var(--fire); z-index: 1000; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 66px;
+      background: rgba(8,8,8,.45); backdrop-filter: blur(22px) saturate(160%);
+      -webkit-backdrop-filter: blur(22px) saturate(160%);
+      border-bottom: 1px solid var(--border); transition: background .4s;
+    }
+    nav.sc { background: rgba(8,8,8,.93); }
+    .n-logo {
+      font-family: var(--FD); font-size: 1.65rem; letter-spacing: .1em;
+      background: linear-gradient(135deg, #CC1F1F, #D4A017, #F5C842);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .n-links { display: flex; gap: 26px; list-style: none; font-size: .74rem; font-weight: 500; letter-spacing: .13em; text-transform: uppercase; }
+    .n-links a { opacity: .55; transition: opacity .2s; }
+    .n-links a:hover { opacity: 1; }
+    .n-cta {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--red); color: #fff;
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: 9px 18px; border-radius: 4px; transition: background .2s, transform .15s;
+    }
+    .n-cta:hover { background: #a81818; transform: translateY(-1px); }
+    .n-ham { display: none; flex-direction: column; gap: 5px; padding: 8px; cursor: pointer; }
+    .n-ham span { display: block; width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: transform .3s, opacity .3s; }
+    @media (max-width:768px) { nav { padding: 0 20px; } .n-links,.n-cta.d { display: none; } .n-ham { display: flex; } }
+
+    /* MOBILE MENU */
+    #mob { position: fixed; inset: 0; z-index: 850; background: rgba(8,8,8,.97); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; opacity: 0; pointer-events: none; transition: opacity .3s; }
+    #mob.on { opacity: 1; pointer-events: auto; }
+    #mob a { font-family: var(--FD); font-size: 2.4rem; letter-spacing: .06em; opacity: .75; transition: opacity .2s; }
+    #mob a:hover { opacity: 1; }
+
+    /* HERO */
+    #hero { position: relative; height: 100vh; min-height: 620px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden; padding: 0 24px; }
+
+    .hero-bg-grad {
+      position: absolute; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(180,20,20,.18) 0%, transparent 65%),
+                  radial-gradient(ellipse 50% 80% at 10% 90%, rgba(212,160,23,.1) 0%, transparent 55%), #080808;
+    }
+
+    /* YouTube bg */
+    .yt-wrap {
+      position: absolute; inset: 0; z-index: 1; overflow: hidden;
+      pointer-events: none;
+    }
+    .yt-wrap::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(8,8,8,.25) 0%, rgba(8,8,8,.5) 55%, rgba(8,8,8,.93) 100%);
+      z-index: 2;
+    }
+    .yt-wrap iframe {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 177.78vh; height: 56.25vw;
+      min-width: 100%; min-height: 100%;
+      transform: translate(-50%,-50%);
+      border: none; opacity: .55;
+    }
+
+    /* hero fallback image (mobile / before yt loads) */
+    .hero-poster {
+      position: absolute; inset: 0; z-index: 0;
+      background: url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1920&q=75&auto=format&fit=crop') center/cover no-repeat;
+      opacity: .35;
+    }
+
+    .hero-content { position: relative; z-index: 3; max-width: 940px; }
+    .hero-eye { font-size: .7rem; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; opacity: 0; }
+    #h-title { font-family: var(--FD); font-size: clamp(5.5rem,18vw,15rem); letter-spacing: .02em; line-height: .88; margin-bottom: 18px; }
+    .hc { display: inline-block; opacity: 0; transform: translateY(70px) rotateX(-45deg); }
+    .hero-tag { font-family: var(--FD); font-size: clamp(.9rem,2.4vw,1.35rem); letter-spacing: .3em; color: var(--gold); opacity: 0; margin-bottom: 12px; }
+    .hero-sub { font-size: clamp(.95rem,2vw,1.15rem); font-weight: 300; color: rgba(245,240,232,.72); margin-bottom: 40px; opacity: 0; }
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; opacity: 0; }
+
+    .btn-p {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--fire); color: #fff;
+      font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: 15px 30px; border-radius: 4px; transition: opacity .2s, transform .15s;
+    }
+    .btn-p:hover { opacity: .85; transform: translateY(-2px); }
+    .btn-o {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--text); border: 1.5px solid rgba(212,160,23,.35);
+      font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: 14px 30px; border-radius: 4px; transition: border-color .2s, color .2s, transform .15s;
+    }
+    .btn-o:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+
+    .scroll-cue { position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; }
+    .scroll-cue span { font-size: .6rem; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+    .s-mouse { width: 22px; height: 34px; border: 1.5px solid rgba(212,160,23,.3); border-radius: 12px; position: relative; }
+    .s-dot { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 3px; height: 6px; background: var(--gold); border-radius: 2px; animation: wh 1.6s ease-in-out infinite; }
+    @keyframes wh { 0%{opacity:1;top:6px} 80%{opacity:0;top:20px} 100%{opacity:0;top:6px} }
+
+    /* HIGHLIGHTS */
+    #hl { padding: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--card); }
+    .hl-grid { display: grid; grid-template-columns: repeat(4,1fr); }
+    @media (max-width:768px) { .hl-grid { grid-template-columns: repeat(2,1fr); } }
+    .hl-item { display: flex; align-items: center; gap: 14px; padding: 26px 28px; border-right: 1px solid var(--border); opacity: 0; transform: translateY(18px); }
+    .hl-item:last-child { border-right: none; }
+    @media (max-width:768px) {
+      .hl-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .hl-item:nth-child(odd) { border-right: 1px solid var(--border); }
+      .hl-item:nth-last-child(-n+2) { border-bottom: none; }
+    }
+    .hl-icon { width: 42px; height: 42px; min-width: 42px; display: flex; align-items: center; justify-content: center; background: rgba(212,160,23,.1); border-radius: 9px; font-size: 1.25rem; }
+    .hl-text strong { display: block; font-size: .83rem; font-weight: 600; margin-bottom: 2px; }
+    .hl-text span { font-size: .72rem; color: var(--muted); }
+
+    /* SECTIONS */
+    section { padding: 100px 40px; }
+    @media (max-width:768px) { section { padding: 70px 20px; } }
+    .s-label { font-size: .68rem; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+    .s-title { font-family: var(--FD); font-size: clamp(2.2rem,5.5vw,4.2rem); letter-spacing: .04em; line-height: 1.0; margin-bottom: 16px; }
+    .s-sub { font-size: 1rem; color: var(--muted); max-width: 500px; line-height: 1.75; }
+
+    /* GESCHICHTE */
+    #gesch { background: var(--dark); }
+    .g-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; max-width: 1100px; margin: 52px auto 0; }
+    @media (max-width:768px) { .g-grid { grid-template-columns: 1fr; gap: 36px; } }
+    .g-img { aspect-ratio: 4/3; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+    .g-img img { width: 100%; height: 100%; object-fit: cover; }
+    .g-body em {
+      font-family: 'Playfair Display', serif; font-size: 1.28rem; color: var(--text);
+      font-style: italic; line-height: 1.55; display: block; margin-bottom: 22px;
+      border-left: 2px solid var(--gold); padding-left: 20px;
+    }
+    .g-body p { color: var(--muted); line-height: 1.8; margin-bottom: 18px; font-size: .95rem; }
+
+    /* BURGER CARDS */
+    #cards { background: linear-gradient(to bottom, var(--dark), #0c0c0c); }
+    .c-head { max-width: 1160px; margin: 0 auto 48px; }
+    .c-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; max-width: 1160px; margin: 0 auto; }
+    @media (max-width:900px) { .c-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width:520px) { .c-grid { grid-template-columns: 1fr; } }
+
+    .b-card { background: #0f0f0f; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: transform .3s, border-color .3s; opacity: 0; transform: translateY(30px); }
+    .b-card:hover { transform: translateY(-6px) !important; border-color: rgba(212,160,23,.45); }
+    .b-img { aspect-ratio: 4/3; overflow: hidden; position: relative; background: #111; }
+    .b-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+    .b-card:hover .b-img img { transform: scale(1.07); }
+    .b-body { padding: 20px 22px 24px; }
+    .b-badge { display: inline-block; font-size: .62rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 7px; }
+    .b-name { font-family: var(--FD); font-size: 1.55rem; letter-spacing: .04em; margin-bottom: 7px; }
+    .b-desc { font-size: .78rem; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+    .b-foot { display: flex; align-items: center; justify-content: space-between; }
+    .b-price { font-family: var(--FD); font-size: 1.5rem; color: var(--gold); letter-spacing: .04em; }
+    .b-btn { font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text); background: rgba(255,255,255,.06); padding: 7px 13px; border-radius: 4px; transition: background .2s; }
+    .b-btn:hover { background: var(--red); }
+
+    /* MENU */
+    #menu { background: #0b0b0b; }
+    .m-head { max-width: 820px; margin: 0 auto 52px; }
+    .m-cats { max-width: 820px; margin: 0 auto; }
+    .m-cat { margin-bottom: 44px; opacity: 0; transform: translateY(22px); }
+    .m-cat-t { font-family: var(--FD); font-size: 1.5rem; letter-spacing: .06em; padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+    .m-item { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .m-item:last-child { border-bottom: none; }
+    .m-left { flex: 1; min-width: 0; }
+    .m-n { font-size: .93rem; font-weight: 500; margin-bottom: 2px; }
+    .m-d { font-size: .76rem; color: var(--muted); line-height: 1.5; }
+    .m-p { font-family: var(--FD); font-size: 1.05rem; color: var(--gold); letter-spacing: .04em; white-space: nowrap; min-width: 58px; text-align: right; }
+    .m-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+    @media (max-width:540px) { .m-2col { grid-template-columns: 1fr; } }
+
+    /* GALERIE */
+    #gal { background: var(--dark); padding-bottom: 0; }
+    .gal-head { max-width: 1160px; margin: 0 auto 44px; }
+    .gal-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-rows: 280px 280px;
+      gap: 4px; max-width: 1160px; margin: 0 auto;
+    }
+    @media (max-width:768px) { .gal-grid { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3,200px); } }
+    @media (max-width:480px) { .gal-grid { grid-template-columns: 1fr; grid-template-rows: repeat(5,220px); } }
+    .g-cell { overflow: hidden; position: relative; opacity: 0; background: #111; }
+    .g-cell:first-child { grid-row: span 2; }
+    @media (max-width:768px) { .g-cell:first-child { grid-row: span 1; } }
+    .g-cell img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+    .g-cell:hover img { transform: scale(1.05); }
+
+    /* LOCATION */
+    #loc { background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .l-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; max-width: 980px; margin: 0 auto; }
+    @media (max-width:768px) { .l-grid { grid-template-columns: 1fr; gap: 36px; } }
+    .l-map { background: #181818; border-radius: 7px; overflow: hidden; border: 1px solid var(--border); aspect-ratio: 4/3; opacity: 0; transform: translateX(-28px); }
+    .l-map iframe { width: 100%; height: 100%; border: none; filter: grayscale(55%) invert(90%) hue-rotate(180deg); }
+    .l-info { opacity: 0; transform: translateX(28px); }
+    .open-b { display: inline-flex; align-items: center; gap: 6px; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #4ade80; background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.22); padding: 4px 12px; border-radius: 100px; margin-bottom: 22px; }
+    .open-dot { width: 7px; height: 7px; background: #4ade80; border-radius: 50%; animation: pu 2s ease-in-out infinite; }
+    @keyframes pu { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+    .l-row { display: flex; gap: 16px; margin-bottom: 28px; }
+    .l-icon { width: 40px; height: 40px; min-width: 40px; background: rgba(212,160,23,.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .l-t strong { display: block; font-size: .73rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+    .l-t a { color: var(--gold); transition: opacity .2s; }
+    .l-t a:hover { opacity: .75; }
+    .h-grid { display: grid; grid-template-columns: 1fr auto; gap: 4px 20px; font-size: .87rem; }
+    .h-grid .d { color: var(--muted); }
+
+    /* RESERVIERUNG */
+    #res { background: linear-gradient(160deg, #0d0800 0%, #080808 100%); text-align: center; padding: 90px 40px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .r-inner { max-width: 680px; margin: 0 auto; }
+    .r-title { font-family: var(--FD); font-size: clamp(2.2rem,5.5vw,4rem); letter-spacing: .04em; margin-bottom: 14px; }
+    .r-sub { font-size: .97rem; color: var(--muted); margin-bottom: 40px; line-height: 1.75; }
+    .r-form { display: flex; flex-direction: column; gap: 14px; text-align: left; margin-bottom: 28px; }
+    .r-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width:520px) { .r-row { grid-template-columns: 1fr; } }
+    .r-field { display: flex; flex-direction: column; gap: 6px; }
+    .r-field label { font-size: .67rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .r-field input, .r-field select, .r-field textarea {
+      background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 5px; padding: 12px 14px; color: var(--text); font-family: var(--FB);
+      font-size: .9rem; outline: none; transition: border-color .2s; width: 100%;
+    }
+    .r-field input:focus, .r-field select:focus, .r-field textarea:focus { border-color: var(--gold); }
+    .r-field select option { background: #181818; }
+    .r-field textarea { resize: vertical; min-height: 80px; }
+    .r-submit { width: 100%; padding: 16px; background: var(--fire); color: #fff; font-family: var(--FB); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; border-radius: 5px; cursor: pointer; border: none; transition: opacity .2s, transform .15s; }
+    .r-submit:hover { opacity: .85; transform: translateY(-2px); }
+    .r-div { display: flex; align-items: center; gap: 16px; font-size: .72rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin: 6px 0; }
+    .r-div::before, .r-div::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .r-alts { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .r-alt { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 5px; font-size: .76rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; transition: transform .15s, opacity .2s; }
+    .r-alt:hover { transform: translateY(-2px); opacity: .85; }
+    .wa { background: #25D366; color: #fff; }
+    .ph { background: rgba(255,255,255,.07); color: var(--text); border: 1px solid var(--border); }
+
+    /* CTA */
+    #cta { text-align: center; background: var(--dark); padding: 120px 40px; position: relative; overflow: hidden; }
+    #cta::before { content: ''; position: absolute; bottom: -180px; left: 50%; transform: translateX(-50%); width: 900px; height: 450px; background: radial-gradient(ellipse, rgba(204,31,31,.12) 0%, transparent 70%); pointer-events: none; }
+    .cta-big { font-family: var(--FD); font-size: clamp(2.8rem,9vw,7rem); letter-spacing: .03em; line-height: 1.0; margin-bottom: 20px; position: relative; z-index: 1; }
+    .cta-sub { font-size: 1rem; color: var(--muted); margin-bottom: 46px; position: relative; z-index: 1; }
+    .cta-btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; position: relative; z-index: 1; }
+    .b-i { display: inline-flex; align-items: center; gap: 9px; padding: 14px 26px; border-radius: 4px; font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; transition: transform .15s, opacity .2s; }
+    .b-i:hover { transform: translateY(-2px); opacity: .85; }
+    .bi-food { background: var(--fire); color: #fff; }
+    .bi-res  { background: rgba(212,160,23,.15); color: var(--gold); border: 1px solid rgba(212,160,23,.3); }
+    .bi-ph   { background: rgba(255,255,255,.07); color: var(--text); border: 1px solid var(--border); }
+
+    /* FOOTER */
+    footer { background: #050505; border-top: 1px solid var(--border); padding: 44px 40px 36px; }
+    .f-inner { max-width: 1160px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 28px; flex-wrap: wrap; }
+    .f-logo { font-family: var(--FD); font-size: 2rem; letter-spacing: .1em; background: linear-gradient(135deg,#CC1F1F,#D4A017,#F5C842); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px; }
+    .f-tag { font-size: .66rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+    .f-addr { font-size: .78rem; color: var(--muted); line-height: 1.8; }
+    .f-r { text-align: right; font-size: .72rem; color: rgba(245,240,232,.28); line-height: 1.9; }
+    .f-r a { color: var(--gold); }
+
+    .reveal { opacity: 0; transform: translateY(28px); }
+  </style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="cur-r"></div>
+<div id="prog"></div>
+
+<!-- MOBILE MENU -->
+<div id="mob">
+  <a href="#cards">Die Burger</a>
+  <a href="#menu">Speisekarte</a>
+  <a href="#gal">Galerie</a>
+  <a href="#loc">Standort</a>
+  <a href="#res">Reservieren</a>
+  <a href="https://www.foodora.at/" target="_blank" rel="noopener" style="color:var(--gold)">Bestellen ↗</a>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <span class="n-logo">TOP BURGER</span>
+  <ul class="n-links">
+    <li><a href="#cards">Die Burger</a></li>
+    <li><a href="#menu">Speisekarte</a></li>
+    <li><a href="#gal">Galerie</a></li>
+    <li><a href="#loc">Standort</a></li>
+    <li><a href="#res">Reservieren</a></li>
+  </ul>
+  <a href="https://www.foodora.at/" target="_blank" rel="noopener" class="n-cta d">Bestellen ↗</a>
+  <div class="n-ham" id="ham" role="button" tabindex="0"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- ════ HERO ════ -->
+<section id="hero">
+  <div class="hero-bg-grad"></div>
+  <!-- Poster image fallback (mobile / slow connections) -->
+  <div class="hero-poster"></div>
+  <!-- YouTube background video -->
+  <div class="yt-wrap" id="yt-bg">
+    <iframe
+      id="yt-iframe"
+      src="https://www.youtube.com/embed/gOLY4Lnv4mw?autoplay=1&mute=1&loop=1&playlist=gOLY4Lnv4mw&controls=0&disablekb=1&fs=0&iv_load_policy=3&modestbranding=1&playsinline=1&rel=0&enablejsapi=1"
+      allow="autoplay; encrypted-media"
+      allowfullscreen>
+    </iframe>
+  </div>
+
+  <div class="hero-content">
+    <p class="hero-eye">Klagenfurt am Wörthersee · Kardinalplatz 8</p>
+    <h1 id="h-title" aria-label="Top Burger">
+      <span class="hw">TOP&nbsp;</span><span class="hw">BURGER</span>
+    </h1>
+    <p class="hero-tag">— TASTE THE DIFFERENCE —</p>
+    <p class="hero-sub">Klagenfurts beste Burger, frisch gegrillt.</p>
+    <div class="hero-btns">
+      <a href="#menu" class="btn-p">🍔 Speisekarte ansehen</a>
+      <a href="https://www.foodora.at/" target="_blank" rel="noopener" class="btn-o">Auf foodora bestellen ↗</a>
+    </div>
+  </div>
+  <div class="scroll-cue" id="sc">
+    <div class="s-mouse"><div class="s-dot"></div></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ════ HIGHLIGHTS ════ -->
+<div id="hl">
+  <div class="hl-grid">
+    <div class="hl-item"><div class="hl-icon">⭐</div><div class="hl-text"><strong>Ausgezeichnet bewertet</strong><span>Top Bewertungen auf foodora</span></div></div>
+    <div class="hl-item"><div class="hl-icon">🥩</div><div class="hl-text"><strong>100% Rindfleisch</strong><span>Frische Zutaten, täglich</span></div></div>
+    <div class="hl-item"><div class="hl-icon">🛵</div><div class="hl-text"><strong>Lieferung via foodora</strong><span>Direkt zu dir nach Hause</span></div></div>
+    <div class="hl-item"><div class="hl-icon">🕐</div><div class="hl-text"><strong>Täglich geöffnet</strong><span>11:00 – 22:00 Uhr</span></div></div>
+  </div>
+</div>
+
+<!-- ════ GESCHICHTE ════ -->
+<section id="gesch">
+  <div style="max-width:1100px;margin:0 auto">
+    <p class="s-label reveal">Über uns</p>
+    <h2 class="s-title reveal">Unsere Geschichte</h2>
+  </div>
+  <div class="g-grid">
+    <div class="g-img reveal">
+      <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=900&q=80&auto=format&fit=crop" alt="Top Burger Klagenfurt – Innenansicht" loading="lazy" />
+    </div>
+    <div class="g-body reveal">
+      <!-- AQUÍ VA: historia real del local cuando el cliente la facilite -->
+      <em>„Weil ein guter Burger mehr ist als nur Fleisch zwischen Brot."</em>
+      <p>Bei Top Burger am Kardinalplatz dreht sich alles um den perfekten Burger. Mit ausgewähltem 100% Rindfleisch, hausgemachten Saucen und einem Brioche Bun, der jeden Bissen zum Erlebnis macht.</p>
+      <p>Das dunkle, von New York inspirierte Interieur schafft die perfekte Atmosphäre – egal ob du zu zweit kommst oder mit der ganzen Crew. Taste the Difference.</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-top:8px">Kardinalplatz 8 · 9020 Klagenfurt am Wörthersee</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════ BURGER CARDS ════ -->
+<section id="cards">
+  <div class="c-head">
+    <p class="s-label reveal">Unsere Highlights</p>
+    <h2 class="s-title reveal">Die Burger</h2>
+    <p class="s-sub reveal">Handgefertigt, frisch gegrillt. Alle Burger im Brioche Bun.</p>
+  </div>
+  <div class="c-grid">
+
+    <div class="b-card">
+      <div class="b-img"><img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=700&q=80&auto=format&fit=crop" alt="Classic Cheeseburger" loading="lazy" /></div>
+      <div class="b-body">
+        <span class="b-badge">Bestseller</span>
+        <h3 class="b-name">Classic Cheeseburger</h3>
+        <p class="b-desc">100% Rindfleisch-Patty · Cheddar · Mayo · Essiggurke · Salat · Tomaten · karamellisierte Zwiebeln · Ketchup</p>
+        <div class="b-foot"><span class="b-price">9,50 €</span><a href="https://www.foodora.at/" target="_blank" rel="noopener" class="b-btn">Bestellen ↗</a></div>
+      </div>
+    </div>
+
+    <div class="b-card">
+      <div class="b-img"><img src="https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=700&q=80&auto=format&fit=crop" alt="Double Cheeseburger" loading="lazy" /></div>
+      <div class="b-body">
+        <span class="b-badge">Fan-Favorit</span>
+        <h3 class="b-name">Double Cheeseburger</h3>
+        <p class="b-desc">2× Rindfleisch-Patty · Cheddar · Weißkäse · BBQ Sauce · Bacon</p>
+        <div class="b-foot"><span class="b-price">16,30 €</span><a href="https://www.foodora.at/" target="_blank" rel="noopener" class="b-btn">Bestellen ↗</a></div>
+      </div>
+    </div>
+
+    <div class="b-card">
+      <div class="b-img"><img src="https://images.unsplash.com/photo-1550547660-d9054cb05e60?w=700&q=80&auto=format&fit=crop" alt="Top Steak Burger" loading="lazy" /></div>
+      <div class="b-body">
+        <span class="b-badge">Premium</span>
+        <h3 class="b-name">Top Steak Burger</h3>
+        <p class="b-desc">220g Steak Patty · Aioli · geschmolzener Käse · karamellisierte Zwiebeln</p>
+        <div class="b-foot"><span class="b-price">17,90 €</span><a href="https://www.foodora.at/" target="_blank" rel="noopener" class="b-btn">Bestellen ↗</a></div>
+      </div>
+    </div>
+
+    <div class="b-card">
+      <div class="b-img"><img src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=700&q=80&auto=format&fit=crop" alt="Hot Cheese Burger" loading="lazy" /></div>
+      <div class="b-body">
+        <span class="b-badge">Pikant 🌶️</span>
+        <h3 class="b-name">Hot Cheese Burger</h3>
+        <p class="b-desc">Cheddar · Yum-Yum Sauce · Jalapeños · Salat · Tomaten · karamellisierte Zwiebeln · Chili-Cocktail-Bacon</p>
+        <div class="b-foot"><span class="b-price">9,90 €</span><a href="https://www.foodora.at/" target="_blank" rel="noopener" class="b-btn">Bestellen ↗</a></div>
+      </div>
+    </div>
+
+    <div class="b-card">
+      <div class="b-img"><img src="https://images.unsplash.com/photo-1586816001966-79b736e04faf?w=700&q=80&auto=format&fit=crop" alt="Bacon Burger" loading="lazy" /></div>
+      <div class="b-body">
+        <span class="b-badge">Special</span>
+        <h3 class="b-name">Top Rösti Burger</h3>
+        <p class="b-desc">Rösti · Cheddar · Weißkäse · Honey Mustard</p>
+        <div class="b-foot"><span class="b-price">15,10 €</span><a href="https://www.foodora.at/" target="_blank" rel="noopener" class="b-btn">Bestellen ↗</a></div>
+      </div>
+    </div>
+
+    <div class="b-card">
+      <div class="b-img"><img src="https://images.unsplash.com/photo-1512621776951-a57ef244c27c?w=700&q=80&auto=format&fit=crop" alt="Green Garden Burger" loading="lazy" /></div>
+      <div class="b-body">
+        <span class="b-badge">Vegan 🌱</span>
+        <h3 class="b-name">Green Garden Burger</h3>
+        <p class="b-desc">100% pflanzlich · frisch & leicht</p>
+        <div class="b-foot"><span class="b-price">12,80 €</span><a href="https://www.foodora.at/" target="_blank" rel="noopener" class="b-btn">Bestellen ↗</a></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════ SPEISEKARTE ════ -->
+<section id="menu">
+  <div class="m-head">
+    <p class="s-label reveal">Vollständige Karte</p>
+    <h2 class="s-title reveal">Speisekarte</h2>
+    <p class="s-sub reveal">Alle Burger im Brioche Bun. Extras & Toppings auf Wunsch.</p>
+  </div>
+  <div class="m-cats">
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🍔 Burger</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Classic Cheeseburger</div><div class="m-d">100% Rindfleisch-Patty, Cheddar, Mayo, Essiggurke, Salat, Tomaten, karamellisierte Zwiebeln, Ketchup</div></div><div class="m-p">9,50 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Bacon Burger</div><div class="m-d">100% Rindfleisch-Patty, Cheddar, Honey Mustard, Salat, Essiggurke, Tomaten, Röstzwiebeln, Aioli, Bacon</div></div><div class="m-p">9,80 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Hot Cheese Burger</div><div class="m-d">Cheddar, Yum-Yum Sauce, Jalapeños, Salat, Tomaten, karamellisierte Zwiebeln, Chili-Cocktail-Bacon</div></div><div class="m-p">9,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Swiss Burger</div><div class="m-d">Schweizer Käse, Mayo, Salat, Tomaten, Champignons, eingelegte Zwiebeln, Yum-Yum Sauce</div></div><div class="m-p">9,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">BBQ Burger</div><div class="m-d">Cheddar, BBQ Sauce, Coleslaw, karamellisierte Zwiebeln, Tomaten, Bacon</div></div><div class="m-p">9,80 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Chili Burger</div><div class="m-d">Cheddar, Mayo, Jalapeños, Salat, Tomaten, frische Zwiebeln, Chili-Cocktail-Bacon</div></div><div class="m-p">9,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Top Rösti Burger</div><div class="m-d">Rösti, Cheddar, Weißkäse, Honey Mustard</div></div><div class="m-p">15,10 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Double Cheeseburger</div><div class="m-d">2× Patty, Cheddar, Weißkäse, BBQ Sauce, Bacon</div></div><div class="m-p">16,30 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Arizona Burger</div><div class="m-d">Paniertes Chicken, Mayo, Salat, Tomaten, Käse, karamellisierte Zwiebeln, BBQ-Sauce</div></div><div class="m-p">9,50 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">⭐ Special Burger</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Smoked Pulled Chicken</div><div class="m-d">Cheddar, BBQ Coleslaw, rote Zwiebeln</div></div><div class="m-p">14,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">American Style Pulled Meat BBQ</div><div class="m-d">Honey Mustard, Brustkern Käse, BBQ Sauce + Pommes</div></div><div class="m-p">14,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Top Steak Burger</div><div class="m-d">220g Steak Patty, Aioli, geschmolzener Käse, karamellisierte Zwiebeln</div></div><div class="m-p">17,90 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🥑 Veggie &amp; Chicken</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Kichererbsen Burger</div><div class="m-d">vegan</div></div><div class="m-p">12,20 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Green Garden Burger</div><div class="m-d">vegan</div></div><div class="m-p">12,80 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Farmer Burger</div><div class="m-d">Spiegelei, Guacamole, Pesto, Rucola</div></div><div class="m-p">10,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Big Chicken Burger</div><div class="m-d">Gewürztes Chicken, Wasabi-Mayo, Essiggurke, Salat, Tomaten, Spiegelei, eingelegte Zwiebeln</div></div><div class="m-p">9,00 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">XXL Chicken Burger</div></div><div class="m-p">16,60 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🌭 Hot Dog</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Hot Dog</div><div class="m-d">Chicken Frankfurter, Röstzwiebeln, Jalapeños, Honey Mustard</div></div><div class="m-p">3,99 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🥗 Salate</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Caesar Salat</div></div><div class="m-p">12,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Grüner Salat</div></div><div class="m-p">12,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Italienischer Salat</div></div><div class="m-p">12,50 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🍜 Bowls</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Chicken Teriyaki Bowl</div></div><div class="m-p">13,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Burger Bowl</div></div><div class="m-p">13,90 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🧀 Vorspeisen</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Tortilla Nachos</div></div><div class="m-p">9,50 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">House Fries</div></div><div class="m-p">9,50 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Mix Cheese Fries</div></div><div class="m-p">10,50 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🍟 Beilagen &amp; Snacks</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Coleslaw</div></div><div class="m-p">4,00 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Rote Rüben Salat</div></div><div class="m-p">4,50 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Kleiner Salat</div></div><div class="m-p">4,00 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Chicken Nuggets</div></div><div class="m-p">5,50 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Zwiebelringe</div></div><div class="m-p">4,00 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Mozzarella Sticks</div></div><div class="m-p">5,50 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🍰 Nachspeisen</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Cheesecake</div><div class="m-d">Mango / Erdbeere / Toffee</div></div><div class="m-p">4,50 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Brownie</div></div><div class="m-p">4,50 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">☕ Café</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Espresso</div></div><div class="m-p">2,00 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Espresso Macchiato</div></div><div class="m-p">2,20 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Cappuccino</div></div><div class="m-p">2,50 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Latte Macchiato</div></div><div class="m-p">3,00 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Heiße Schokolade</div></div><div class="m-p">3,00 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🧃 Frische Säfte &amp; Shakes</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Bananen Milchshake</div></div><div class="m-p">4,00 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Mango Shake</div><div class="m-d">mit Saft oder Milch</div></div><div class="m-p">4,00 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Karottensaft</div><div class="m-d">100% hausgemacht</div></div><div class="m-p">4,00 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Orangensaft</div><div class="m-d">frisch gepresst</div></div><div class="m-p">3,50 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🥤 Softdrinks</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Cola · Cola Zero · Fanta · Mezzo Mix</div></div><div class="m-p">2,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Eistee Pfirsich · Soda Zitrone · Soda Himbeere</div></div><div class="m-p">2,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Wassermelonen Getränk</div></div><div class="m-p">2,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Red Bull 0,25l</div></div><div class="m-p">2,90 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Pago Mango · Pago Marille · Pago Johannisbeere 0,2l</div></div><div class="m-p">2,50 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">🍺 Bier &amp; Spritzer</h3>
+      <div class="m-item"><div class="m-left"><div class="m-n">Stiegl 0,0% alkoholfrei 0,5l</div></div><div class="m-p">3,30 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Stiegl Goldbräu 0,5l</div></div><div class="m-p">3,50 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Stiegl Weisse 0,5l</div></div><div class="m-p">3,50 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Tegernseer Hell 0,33l</div></div><div class="m-p">3,50 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Weißer Spritzer 0,25l</div></div><div class="m-p">3,00 €</div></div>
+      <div class="m-item"><div class="m-left"><div class="m-n">Aperol Spritz</div></div><div class="m-p">4,00 €</div></div>
+    </div>
+
+    <div class="m-cat">
+      <h3 class="m-cat-t">➕ Extras &amp; Toppings</h3>
+      <div class="m-2col">
+        <div>
+          <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">Bun &amp; Patties</p>
+          <div class="m-item"><div class="m-left"><div class="m-n">Dunkles Bun</div></div><div class="m-p">1,00 €</div></div>
+          <div class="m-item"><div class="m-left"><div class="m-n">Glutenfreies Bun</div></div><div class="m-p">1,00 €</div></div>
+          <div class="m-item"><div class="m-left"><div class="m-n">Rindfleisch-Patty</div></div><div class="m-p">2,00 €</div></div>
+          <div class="m-item"><div class="m-left"><div class="m-n">Gewürztes Chicken</div></div><div class="m-p">2,00 €</div></div>
+          <div class="m-item"><div class="m-left"><div class="m-n">Paniertes Chicken / Soja-Patty / Rösti</div></div><div class="m-p">2,00 €</div></div>
+        </div>
+        <div>
+          <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">Toppings</p>
+          <div class="m-item"><div class="m-left"><div class="m-n">Trüffel Mayo</div></div><div class="m-p">1,00 €</div></div>
+          <div class="m-item"><div class="m-left"><div class="m-n">Coleslaw · Spiegelei · Cheddar</div></div><div class="m-p">1,00 €</div></div>
+          <div class="m-item"><div class="m-left"><div class="m-n">Käse Sauce</div></div><div class="m-p">1,50 €</div></div>
+          <div class="m-item"><div class="m-left"><div class="m-n">Guacamole</div></div><div class="m-p">1,00 €</div></div>
+          <div class="m-item"><div class="m-left"><div class="m-n">Bacon</div></div><div class="m-p">1,50 €</div></div>
+        </div>
+      </div>
+      <p style="font-size:.78rem;color:var(--muted);margin-top:16px">🆓 Gratis-Saucen: Ketchup · Mayo · And 1000 · Honey Mustard · Yum-Yum · Chili-Sauce</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════ GALERIE ════ -->
+<section id="gal">
+  <div class="gal-head">
+    <p class="s-label reveal">Impressionen</p>
+    <h2 class="s-title reveal">Galerie</h2>
+  </div>
+  <div class="gal-grid">
+    <div class="g-cell"><img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200&q=80&auto=format&fit=crop" alt="Burger" loading="lazy" /></div>
+    <div class="g-cell"><img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=700&q=80&auto=format&fit=crop" alt="Restaurant" loading="lazy" /></div>
+    <div class="g-cell"><img src="https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=700&q=80&auto=format&fit=crop" alt="Burger" loading="lazy" /></div>
+    <div class="g-cell"><img src="https://images.unsplash.com/photo-1550547660-d9054cb05e60?w=700&q=80&auto=format&fit=crop" alt="Steak Burger" loading="lazy" /></div>
+    <div class="g-cell"><img src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=700&q=80&auto=format&fit=crop" alt="Cheeseburger" loading="lazy" /></div>
+  </div>
+</section>
+
+<!-- ════ LOCATION ════ -->
+<section id="loc">
+  <div style="max-width:980px;margin:0 auto 44px">
+    <p class="s-label">Besuche uns</p>
+    <h2 class="s-title">Wo wir sind</h2>
+  </div>
+  <div class="l-grid">
+    <div class="l-map">
+      <iframe title="Top Burger Klagenfurt"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2713.5!2d14.305!3d46.622!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x477527f7c6b22d47%3A0x1!2sKardinalplatz+8%2C+9020+Klagenfurt!5e0!3m2!1sde!2sat!4v1"
+        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+    <div class="l-info">
+      <div class="open-b"><div class="open-dot"></div> Täglich geöffnet</div>
+      <div class="l-row"><div class="l-icon">📍</div><div class="l-t"><strong>Adresse</strong><a href="https://maps.google.com/?q=Kardinalplatz+8,+9020+Klagenfurt" target="_blank" rel="noopener">Kardinalplatz 8<br/>9020 Klagenfurt am Wörthersee</a></div></div>
+      <div class="l-row"><div class="l-icon">🕐</div><div class="l-t"><strong>Öffnungszeiten</strong><div class="h-grid"><span class="d">Montag – Sonntag</span><span>11:00 – 22:00 Uhr</span></div></div></div>
+      <div class="l-row"><div class="l-icon">📞</div><div class="l-t"><strong>Telefon</strong><a href="tel:+436769020841">+43 676 9020841</a></div></div>
+      <div class="l-row"><div class="l-icon">🛵</div><div class="l-t"><strong>Online bestellen</strong><a href="https://www.foodora.at/" target="_blank" rel="noopener">Über foodora ↗</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ RESERVIERUNG ════ -->
+<section id="res">
+  <div class="r-inner">
+    <p class="s-label reveal">Tisch reservieren</p>
+    <h2 class="r-title reveal">Reservierung</h2>
+    <p class="r-sub reveal">Sichere dir deinen Tisch – besonders am Wochenende empfehlen wir eine Reservierung.</p>
+    <form class="r-form reveal" onsubmit="doRes(event)">
+      <div class="r-row">
+        <div class="r-field"><label>Name</label><input type="text" placeholder="Dein Name" required /></div>
+        <div class="r-field"><label>Telefon / WhatsApp</label><input type="tel" id="rp" placeholder="+43 ..." required /></div>
+      </div>
+      <div class="r-row">
+        <div class="r-field"><label>Datum</label><input type="date" id="rd" required /></div>
+        <div class="r-field"><label>Uhrzeit</label>
+          <select id="rt" required>
+            <option value="" disabled selected>Uhrzeit wählen</option>
+            <option>11:00</option><option>11:30</option><option>12:00</option><option>12:30</option>
+            <option>13:00</option><option>13:30</option><option>14:00</option><option>14:30</option>
+            <option>15:00</option><option>15:30</option><option>16:00</option><option>16:30</option>
+            <option>17:00</option><option>17:30</option><option>18:00</option><option>18:30</option>
+            <option>19:00</option><option>19:30</option><option>20:00</option><option>20:30</option>
+            <option>21:00</option><option>21:30</option>
+          </select>
+        </div>
+      </div>
+      <div class="r-field"><label>Anzahl Personen</label>
+        <select id="rpers" required>
+          <option value="" disabled selected>Personen wählen</option>
+          <option>1 Person</option><option>2 Personen</option><option>3 Personen</option>
+          <option>4 Personen</option><option>5 Personen</option><option>6 Personen</option>
+          <option>7+ Personen (Gruppenanfrage)</option>
+        </select>
+      </div>
+      <div class="r-field"><label>Anmerkungen (optional)</label><textarea id="rn" placeholder="Besondere Wünsche, Allergien, Anlass..."></textarea></div>
+      <button type="submit" class="r-submit">Tisch anfragen – via WhatsApp ↗</button>
+    </form>
+    <div class="r-div">oder direkt kontaktieren</div>
+    <div class="r-alts">
+      <a href="https://wa.me/436769020841?text=Hallo%2C+ich+m%C3%B6chte+einen+Tisch+reservieren." target="_blank" rel="noopener" class="r-alt wa">💬 WhatsApp</a>
+      <a href="tel:+436769020841" class="r-alt ph">📞 Anrufen</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════ CTA ════ -->
+<section id="cta">
+  <h2 class="cta-big reveal">Hungrig?<br/>Komm vorbei.</h2>
+  <p class="cta-sub reveal">Oder bestell direkt auf foodora – frisch gegrillt, schnell geliefert.</p>
+  <div class="cta-btns reveal">
+    <a href="https://www.foodora.at/" target="_blank" rel="noopener" class="b-i bi-food">🛵 Auf foodora bestellen</a>
+    <a href="#res" class="b-i bi-res">🗓️ Tisch reservieren</a>
+    <a href="tel:+436769020841" class="b-i bi-ph">📞 +43 676 9020841</a>
+  </div>
+</section>
+
+<!-- ════ FOOTER ════ -->
+<footer>
+  <div class="f-inner">
+    <div>
+      <div class="f-logo">TOP BURGER</div>
+      <div class="f-tag">Taste the Difference</div>
+      <div class="f-addr">Kardinalplatz 8 · 9020 Klagenfurt am Wörthersee<br/><a href="tel:+436769020841" style="color:var(--gold)">+43 676 9020841</a><br/>Mo – So · 11:00 – 22:00 Uhr</div>
+    </div>
+    <div class="f-r">
+      <!-- AQUÍ VA: tu nombre o marca -->
+      Design: <a href="#">[TU MARCA]</a><br/>
+      © 2025 Top Burger Klagenfurt.<br/>Alle Rechte vorbehalten.
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* Lenis */
+  const lenis = new Lenis({ lerp: .08, smoothWheel: true });
+  (function raf(t){ lenis.raf(t); requestAnimationFrame(raf); })(0);
+
+  /* GSAP */
+  gsap.registerPlugin(ScrollTrigger);
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t*1000));
+  gsap.ticker.lagSmoothing(0);
+
+  /* Progress */
+  const prog = document.getElementById('prog');
+  window.addEventListener('scroll', ()=>{
+    const s = document.documentElement;
+    prog.style.width = (s.scrollTop/(s.scrollHeight-s.clientHeight)*100)+'%';
+  }, {passive:true});
+
+  /* Nav scroll */
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', ()=> nav.classList.toggle('sc', window.scrollY>60), {passive:true});
+
+  /* Mobile menu */
+  const ham = document.getElementById('ham');
+  const mob = document.getElementById('mob');
+  let mOpen = false;
+  function setMob(v){
+    mOpen = v; mob.classList.toggle('on', v);
+    const s = ham.querySelectorAll('span');
+    if(v){ s[0].style.transform='translateY(7px) rotate(45deg)'; s[1].style.opacity='0'; s[2].style.transform='translateY(-7px) rotate(-45deg)'; }
+    else { s[0].style.transform=s[2].style.transform=''; s[1].style.opacity=''; }
+  }
+  ham.addEventListener('click', ()=> setMob(!mOpen));
+  mob.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> setMob(false)));
+
+  /* Cursor */
+  const isTouch = window.matchMedia('(hover:none)').matches;
+  if(!isTouch){
+    const cur = document.getElementById('cur');
+    const ring = document.getElementById('cur-r');
+    document.addEventListener('mousemove', e=>{
+      cur.style.left = ring.style.left = e.clientX+'px';
+      cur.style.top  = ring.style.top  = e.clientY+'px';
+    });
+    document.querySelectorAll('a,button,[role=button]').forEach(el=>{
+      el.addEventListener('mouseenter', ()=> document.body.classList.add('ch'));
+      el.addEventListener('mouseleave', ()=> document.body.classList.remove('ch'));
+    });
+  }
+
+  /* Hero kinetic title */
+  const titleEl = document.getElementById('h-title');
+  const words = titleEl.querySelectorAll('.hw');
+  titleEl.innerHTML = '';
+  let d = 0;
+  words.forEach((w, wi)=>{
+    const txt = w.textContent;
+    const wrap = document.createElement('span');
+    wrap.style.display = 'inline-block';
+    for(let i=0;i<txt.length;i++){
+      const ch = document.createElement('span');
+      ch.className = 'hc';
+      ch.textContent = txt[i];
+      ch.dataset.d = d;
+      wrap.appendChild(ch);
+      d += .05;
+    }
+    titleEl.appendChild(wrap);
+    if(wi < words.length-1) titleEl.appendChild(document.createTextNode(' '));
+  });
+
+  window.addEventListener('load', ()=>{
+    document.querySelectorAll('.hc').forEach(ch=>{
+      gsap.to(ch, { opacity:1, y:0, rotateX:0, duration:.5,
+        delay: parseFloat(ch.dataset.d)+.1, ease:'back.out(1.5)' });
+    });
+    gsap.to('.hero-eye',  {opacity:1, duration:.6, delay:.1,    ease:'power2.out'});
+    gsap.to('.hero-tag',  {opacity:1, duration:.6, delay:d+.18, ease:'power2.out'});
+    gsap.to('.hero-sub',  {opacity:1, duration:.6, delay:d+.32, ease:'power2.out'});
+    gsap.to('.hero-btns', {opacity:1, duration:.6, delay:d+.46, ease:'power2.out'});
+    gsap.to('#sc',        {opacity:1, duration:.6, delay:d+.7,  ease:'power2.out'});
+  });
+
+  /* Highlights */
+  gsap.utils.toArray('.hl-item').forEach((el,i)=>{
+    gsap.to(el, {opacity:1,y:0,duration:.5,delay:i*.1,ease:'power2.out',
+      scrollTrigger:{trigger:'#hl',start:'top 85%',once:true}});
+  });
+
+  /* Generic reveals */
+  gsap.utils.toArray('.reveal').forEach(el=>{
+    gsap.to(el,{opacity:1,y:0,duration:.65,ease:'power2.out',
+      scrollTrigger:{trigger:el,start:'top 88%',once:true}});
+  });
+
+  /* Burger cards */
+  gsap.utils.toArray('.b-card').forEach((c,i)=>{
+    gsap.to(c,{opacity:1,y:0,duration:.55,delay:(i%3)*.1,ease:'power2.out',
+      scrollTrigger:{trigger:c,start:'top 88%',once:true}});
+  });
+
+  /* Menu cats */
+  gsap.utils.toArray('.m-cat').forEach(cat=>{
+    gsap.to(cat,{opacity:1,y:0,duration:.55,ease:'power2.out',
+      scrollTrigger:{trigger:cat,start:'top 90%',once:true}});
+  });
+
+  /* Gallery */
+  gsap.utils.toArray('.g-cell').forEach((c,i)=>{
+    gsap.to(c,{opacity:1,duration:.7,delay:i*.09,ease:'power2.out',
+      scrollTrigger:{trigger:'#gal',start:'top 80%',once:true}});
+  });
+
+  /* Location */
+  gsap.to('.l-map', {opacity:1,x:0,duration:.7,ease:'power2.out',
+    scrollTrigger:{trigger:'#loc',start:'top 80%',once:true}});
+  gsap.to('.l-info',{opacity:1,x:0,duration:.7,delay:.15,ease:'power2.out',
+    scrollTrigger:{trigger:'#loc',start:'top 80%',once:true}});
+
+  /* Hero parallax */
+  if(!isTouch){
+    gsap.to('.hero-bg-grad',{yPercent:20,ease:'none',
+      scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:true}});
+  }
+
+  /* Smooth anchors */
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click', e=>{
+      const t = document.querySelector(a.getAttribute('href'));
+      if(!t) return; e.preventDefault();
+      lenis.scrollTo(t,{offset:-66,duration:1.4,easing:t=>1-Math.pow(1-t,4)});
+    });
+  });
+
+  /* Reservation → WhatsApp */
+  window.doRes = function(e){
+    e.preventDefault();
+    const f = e.target;
+    const name = f.querySelector('[placeholder="Dein Name"]').value;
+    const ph   = document.getElementById('rp').value;
+    const date = document.getElementById('rd').value;
+    const time = document.getElementById('rt').value;
+    const pers = document.getElementById('rpers').value;
+    const note = document.getElementById('rn').value;
+    const msg = `Hallo Top Burger! Ich möchte reservieren.\n\n👤 ${name}\n📅 ${date} um ${time} Uhr\n👥 ${pers}\n📞 ${ph}${note?'\n📝 '+note:''}`;
+    window.open('https://wa.me/436769020841?text='+encodeURIComponent(msg),'_blank');
+  };
+
+})();
+</script>
+</body>
+</html>
