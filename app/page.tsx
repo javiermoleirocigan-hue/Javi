@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
+import Navbar from '@/components/Navbar'
 import HeroOverlay from '@/components/HeroOverlay'
 import AboutSection from '@/components/sections/AboutSection'
 import CrewSection from '@/components/sections/CrewSection'
@@ -36,6 +37,8 @@ export default function Page() {
 
   return (
     <main className="bg-[#080808] text-white overflow-x-hidden">
+      <Navbar />
+
       {/* 3D Scroll Section */}
       <div ref={containerRef} className="relative h-[500vh]">
         <div className="sticky top-0 h-screen w-full">

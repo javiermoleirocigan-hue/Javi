@@ -12,7 +12,8 @@ const config: Config = {
         dark: '#080808',
       },
       fontFamily: {
-        sans: ['var(--font-geist)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        disp: ['var(--font-disp)', 'Impact', 'sans-serif'],
       },
     },
   },
