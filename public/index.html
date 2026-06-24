@@ -6,101 +6,216 @@
 <title>SMASH CREW — We Ball Different</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
-  body{background:#080808;color:#fff;font-family:'Inter',system-ui,sans-serif;overflow-x:hidden}
+  body{background:#080808;color:#fff;font-family:'Inter',system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
   ::selection{background:#4ADE80;color:#080808}
   ::-webkit-scrollbar{width:4px}
   ::-webkit-scrollbar-track{background:#111}
   ::-webkit-scrollbar-thumb{background:#4ADE80;border-radius:2px}
+  section[id]{scroll-margin-top:80px}
+
+  /* ---- Typography ---- */
+  .font-disp{font-family:'Anton',Impact,sans-serif}
+
+  /* ---- Navbar ---- */
+  .navbar{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:20px 28px;transition:background .3s,padding .3s,border-color .3s;border-bottom:1px solid transparent}
+  .navbar.scrolled{background:rgba(8,8,8,.92);backdrop-filter:blur(12px);padding:12px 28px;border-color:rgba(255,255,255,.08)}
+  .nav-logo{font-family:'Anton',Impact,sans-serif;font-size:1.25rem;text-transform:uppercase;text-decoration:none;color:#fff}
+  .nav-logo span{color:#4ADE80}
+  .nav-links{display:flex;align-items:center;gap:4px}
+  .nav-links a{color:rgba(255,255,255,.55);font-weight:600;font-size:.9rem;padding:8px 14px;border-radius:999px;text-decoration:none;transition:color .2s,background .2s}
+  .nav-links a:hover{color:#fff;background:rgba(255,255,255,.05)}
+  .nav-cta{background:#4ADE80;color:#080808;font-weight:900;font-size:.85rem;padding:8px 18px;border-radius:999px;text-decoration:none;transition:background .2s}
+  .nav-cta:hover{background:#fff}
+  .burger{display:none;flex-direction:column;gap:5px;padding:8px;background:none;border:0;cursor:pointer;position:relative;z-index:960}
+  .burger span{display:block;width:24px;height:2.5px;background:#fff;border-radius:2px;transition:.3s}
+  .burger.open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);background:#4ADE80}
+  .burger.open span:nth-child(2){opacity:0}
+  .burger.open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);background:#4ADE80}
+  .mobile-menu{position:fixed;inset:0;z-index:850;background:rgba(8,8,8,.98);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;visibility:hidden;transition:.3s;padding-top:80px}
+  .mobile-menu.open{opacity:1;visibility:visible}
+  .mobile-menu a{font-family:'Anton',Impact,sans-serif;font-size:3rem;text-transform:uppercase;color:#fff;text-decoration:none;padding:8px;transition:color .2s}
+  .mobile-menu a:hover{color:#4ADE80}
+  .mobile-menu .m-cta{margin-top:20px;background:#4ADE80;color:#080808;font-family:'Inter',sans-serif;font-weight:900;font-size:1.1rem;padding:14px 36px;border-radius:999px;text-transform:none}
+  .mobile-menu .m-cta:hover{background:#fff;color:#080808}
+  @media(max-width:768px){.nav-links,.nav-cta{display:none}.burger{display:flex}}
+
+  /* ---- Hero ---- */
   #canvas-container{position:sticky;top:0;height:100vh;width:100%;overflow:hidden}
   #hero-canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
   #hero-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-  .scroll-hint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem}
-  .scroll-line{width:1px;height:2.5rem;background:linear-gradient(to bottom,rgba(255,255,255,.4),transparent);animation:pulse 2s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  #vignette{position:absolute;inset:0;background:radial-gradient(ellipse 70% 70% at 50% 50%,transparent 35%,rgba(8,8,8,.45) 100%);pointer-events:none}
+
+  /* Scroll hint — mouse icon */
+  .scroll-hint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px}
+  .scroll-hint span{color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:.35em;text-transform:uppercase}
+  .mouse-icon{width:22px;height:36px;border:2px solid rgba(255,255,255,.25);border-radius:14px;position:relative}
+  .mouse-dot{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:4px;height:7px;border-radius:3px;background:#4ADE80;animation:scrollDot 1.9s ease infinite}
+  @keyframes scrollDot{0%{opacity:0;top:7px}40%{opacity:1}100%{opacity:0;top:18px}}
+
+  /* ---- Scroll Reveal ---- */
+  .reveal{opacity:0;transform:translateY(32px);transition:opacity .75s cubic-bezier(.2,.8,.2,1),transform .75s cubic-bezier(.2,.8,.2,1)}
+  .reveal.on{opacity:1;transform:none}
+  .reveal-d1{transition-delay:100ms}
+  .reveal-d2{transition-delay:200ms}
+  .reveal-d3{transition-delay:300ms}
+
+  .stagger > *{opacity:0;transform:translateY(24px);transition:opacity .6s cubic-bezier(.2,.8,.2,1),transform .6s cubic-bezier(.2,.8,.2,1)}
+  .stagger.on > *:nth-child(1){opacity:1;transform:none;transition-delay:0ms}
+  .stagger.on > *:nth-child(2){opacity:1;transform:none;transition-delay:80ms}
+  .stagger.on > *:nth-child(3){opacity:1;transform:none;transition-delay:160ms}
+  .stagger.on > *:nth-child(4){opacity:1;transform:none;transition-delay:240ms}
+  .stagger.on > *:nth-child(5){opacity:1;transform:none;transition-delay:320ms}
+  .stagger.on > *:nth-child(6){opacity:1;transform:none;transition-delay:400ms}
+
+  /* ---- Sections ---- */
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+  @media(max-width:768px){.about-grid{grid-template-columns:1fr}}
+
   .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.08)}
   @media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+  .stat-item{background:#080808;padding:3rem 2rem;text-align:center;transition:background .2s}
+  .stat-item:hover{background:#0d0d0d}
+  .stat-num{font-family:'Anton',Impact,sans-serif;font-size:clamp(2.5rem,6vw,4rem);color:#4ADE80;line-height:1;margin-bottom:.5rem;transition:transform .3s;transform-origin:bottom}
+  .stat-item:hover .stat-num{transform:scale(1.06)}
+
   .crew-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
   @media(max-width:900px){.crew-grid{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:560px){.crew-grid{grid-template-columns:1fr}}
-  .card{border:1px solid rgba(255,255,255,.08);border-radius:1rem;padding:1.5rem;background:rgba(255,255,255,.02);transition:border-color .3s}
-  .card:hover{border-color:rgba(74,222,128,.4)}
-  .progress-bar{height:4px;border-radius:9999px;background:rgba(255,255,255,.1);overflow:hidden}
-  .progress-fill{height:100%;border-radius:9999px;background:#4ADE80}
-  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
-  @media(max-width:768px){.about-grid{grid-template-columns:1fr}}
-  .btn-primary{padding:.9rem 2.5rem;background:#4ADE80;color:#080808;font-weight:900;border-radius:9999px;font-size:1.1rem;border:none;cursor:pointer;transition:background .2s}
+
+  .card{border:1px solid rgba(255,255,255,.08);border-radius:1rem;padding:1.5rem;background:rgba(255,255,255,.02);transition:border-color .3s,background .3s}
+  .card:hover{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.04)}
+
+  .avatar{width:44px;height:44px;border-radius:10px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;transition:background .3s,border-color .3s;font-family:'Anton',Impact,sans-serif;font-size:1.25rem;color:#4ADE80;line-height:1}
+  .card:hover .avatar{background:rgba(74,222,128,.18);border-color:rgba(74,222,128,.35)}
+
+  .progress-bar{height:3px;border-radius:9999px;background:rgba(255,255,255,.08);overflow:hidden}
+  .progress-fill{height:100%;border-radius:9999px;background:linear-gradient(90deg,#4ADE80,#22c55e)}
+
+  .kicker{color:#4ADE80;font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
+  .kicker::before{content:'';display:inline-block;width:20px;height:1px;background:#4ADE80;flex-shrink:0}
+
+  .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:.9rem 2.5rem;background:#4ADE80;color:#080808;font-weight:900;border-radius:9999px;font-size:1.05rem;border:none;cursor:pointer;transition:background .2s,transform .2s}
   .btn-primary:hover{background:#fff}
-  .btn-secondary{padding:.9rem 2.5rem;border:1px solid rgba(255,255,255,.2);color:#fff;font-weight:700;border-radius:9999px;font-size:1.1rem;background:transparent;cursor:pointer;transition:border-color .2s}
-  .btn-secondary:hover{border-color:rgba(255,255,255,.6)}
+  .btn-primary svg{transition:transform .2s}
+  .btn-primary:hover svg{transform:translateX(4px)}
+  .btn-secondary{padding:.9rem 2.5rem;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.8);font-weight:700;border-radius:9999px;font-size:1.05rem;background:transparent;cursor:pointer;transition:border-color .2s,color .2s,background .2s}
+  .btn-secondary:hover{border-color:rgba(255,255,255,.45);color:#fff;background:rgba(255,255,255,.05)}
+
+  /* Footer */
+  .foot-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:3rem}
+  @media(max-width:640px){.foot-grid{grid-template-columns:1fr;gap:2rem}}
+  .foot-link{display:block;color:rgba(255,255,255,.35);font-size:.9rem;text-decoration:none;padding:5px 0;transition:color .2s}
+  .foot-link:hover{color:#fff}
+  .foot-link-green:hover{color:#4ADE80}
+  .foot-label{color:rgba(255,255,255,.5);font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;font-weight:700;margin-bottom:1.25rem;display:block}
 </style>
 <script>tailwind.config={theme:{extend:{colors:{accent:'#4ADE80'}}}}</script>
 </head>
 <body>
 
+<!-- ==================== NAVBAR ==================== -->
+<header class="navbar" id="navbar">
+  <a href="#" class="nav-logo">SMASH<span>CREW</span></a>
+  <nav class="nav-links">
+    <a href="#nosotros">Nosotros</a>
+    <a href="#crew">El Crew</a>
+    <a href="#stats">Stats</a>
+  </nav>
+  <a href="#cta" class="nav-cta">Únete</a>
+  <button class="burger" id="burger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#nosotros" onclick="closeMenu()">Nosotros</a>
+  <a href="#crew" onclick="closeMenu()">El Crew</a>
+  <a href="#stats" onclick="closeMenu()">Stats</a>
+  <a href="#cta" class="m-cta" onclick="closeMenu()">Únete al crew</a>
+</div>
+
 <!-- ==================== 3D SCROLL SECTION ==================== -->
 <div id="scroll-driver" style="height:500vh;position:relative">
   <div id="canvas-container">
     <canvas id="hero-canvas"></canvas>
+    <div id="vignette"></div>
     <div id="hero-overlay">
-      <div id="title-block" style="text-align:center;transition:opacity .15s,transform .15s">
-        <h1 style="font-size:clamp(3rem,12vw,9rem);font-weight:900;line-height:1;letter-spacing:-.04em;text-transform:uppercase">
+      <div id="title-block" style="text-align:center;transition:none">
+        <!-- Eyebrow -->
+        <div id="eyebrow" style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;border:1px solid rgba(74,222,128,.25);background:rgba(74,222,128,.08);margin-bottom:1.5rem">
+          <span style="width:6px;height:6px;border-radius:50%;background:#4ADE80;display:inline-block;animation:pulse 2s infinite"></span>
+          <span style="color:#4ADE80;font-size:.65rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase">Temporada 2025</span>
+        </div>
+        <br>
+        <h1 class="font-disp" style="font-size:clamp(4rem,14vw,10rem);line-height:.85;text-transform:uppercase;letter-spacing:-.01em">
           SMASH<br><span style="color:#4ADE80">CREW</span>
         </h1>
-        <p id="subtitle" style="margin-top:1rem;font-size:clamp(.9rem,2vw,1.2rem);color:rgba(255,255,255,.55);letter-spacing:.3em;text-transform:uppercase;font-weight:300">
+        <p id="subtitle" style="margin-top:1.25rem;font-size:clamp(.8rem,1.8vw,1.05rem);color:rgba(255,255,255,.45);letter-spacing:.25em;text-transform:uppercase;font-weight:300">
           We came for the pádel. We stayed for the vibe.
         </p>
       </div>
+
+      <!-- Mouse scroll hint -->
       <div class="scroll-hint" id="scroll-hint">
-        <span style="color:rgba(255,255,255,.35);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase">Scroll</span>
-        <div class="scroll-line"></div>
+        <span>Scroll</span>
+        <div class="mouse-icon">
+          <div class="mouse-dot"></div>
+        </div>
       </div>
+
       <div id="assembling-text" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none">
-        <p style="font-size:clamp(1rem,3vw,1.5rem);color:rgba(255,255,255,.45);letter-spacing:.4em;text-transform:uppercase;font-weight:300">Volviendo a casa...</p>
+        <p style="font-size:clamp(1rem,3vw,1.5rem);color:rgba(255,255,255,.4);letter-spacing:.4em;text-transform:uppercase;font-weight:300">Volviendo a casa...</p>
       </div>
       <div id="boom-text" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none">
-        <p style="font-size:clamp(4rem,18vw,14rem);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;text-shadow:0 0 80px #4ADE80,0 0 40px #4ADE80">BOOM</p>
+        <p class="font-disp" style="font-size:clamp(4rem,18vw,14rem);line-height:1;text-transform:uppercase;text-shadow:0 0 60px #4ADE80,0 0 30px #4ADE80,0 0 120px rgba(74,222,128,.35)">BOOM</p>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ==================== ABOUT ==================== -->
-<section style="padding:8rem 1.5rem;max-width:64rem;margin:0 auto">
+<section id="nosotros" style="padding:8rem 1.5rem;max-width:64rem;margin:0 auto">
   <div class="about-grid">
     <div>
-      <p style="color:#4ADE80;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;font-weight:500;margin-bottom:1rem">Nuestra historia</p>
-      <h2 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:900;line-height:1.1;letter-spacing:-.03em;margin-bottom:1.5rem">
-        Empezamos con<br>
-        <span style="color:rgba(255,255,255,.25)">una pista</span> y<br>
-        mucha actitud.
-      </h2>
-      <p style="color:rgba(255,255,255,.5);font-size:1.1rem;line-height:1.7">
-        Todo empezó un domingo lluvioso de octubre. Seis amigos, una pista reservada
-        y cero idea de cómo dar una bandeja decente. Tres temporadas después, seguimos
-        siendo igual de malos. Pero lo pasamos infinitamente mejor.
-      </p>
+      <div class="reveal">
+        <p class="kicker">Nuestra historia</p>
+        <h2 class="font-disp" style="font-size:clamp(2.8rem,6vw,4.8rem);line-height:.88;text-transform:uppercase;margin-bottom:1.5rem">
+          Empezamos con<br>
+          <span style="color:rgba(255,255,255,.22)">una pista</span> y<br>
+          mucha actitud.
+        </h2>
+      </div>
+      <div class="reveal reveal-d2">
+        <p style="color:rgba(255,255,255,.45);font-size:1rem;line-height:1.75">
+          Todo empezó un domingo lluvioso de octubre. Seis amigos, una pista reservada
+          y cero idea de cómo dar una bandeja decente. Tres temporadas después, seguimos
+          siendo igual de malos. Pero lo pasamos infinitamente mejor.
+        </p>
+      </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:1rem">
+    <div class="reveal reveal-d1" style="display:flex;flex-direction:column;gap:.75rem">
       <div class="card">
         <div style="display:flex;gap:1.25rem">
-          <span style="color:#4ADE80;font-weight:900;font-size:.85rem;margin-top:.1rem;flex-shrink:0">01</span>
-          <div><h3 style="font-weight:700;margin-bottom:.25rem">Jugar</h3><p style="color:rgba(255,255,255,.45);font-size:.9rem;line-height:1.6">Cada fin de semana, llueva o truene. Las excusas las dejamos fuera de la pista.</p></div>
+          <span class="font-disp" style="color:#4ADE80;font-size:.85rem;margin-top:.1rem;flex-shrink:0">01</span>
+          <div><h3 style="font-weight:700;margin-bottom:.25rem;font-size:.95rem">Jugar</h3><p style="color:rgba(255,255,255,.4);font-size:.85rem;line-height:1.65">Cada fin de semana, llueva o truene. Las excusas las dejamos fuera de la pista.</p></div>
         </div>
       </div>
       <div class="card">
         <div style="display:flex;gap:1.25rem">
-          <span style="color:#4ADE80;font-weight:900;font-size:.85rem;margin-top:.1rem;flex-shrink:0">02</span>
-          <div><h3 style="font-weight:700;margin-bottom:.25rem">Aprender</h3><p style="color:rgba(255,255,255,.45);font-size:.9rem;line-height:1.6">Videos de YouTube a las 2 de la mañana y bandeja que sigue sin entrar.</p></div>
+          <span class="font-disp" style="color:#4ADE80;font-size:.85rem;margin-top:.1rem;flex-shrink:0">02</span>
+          <div><h3 style="font-weight:700;margin-bottom:.25rem;font-size:.95rem">Aprender</h3><p style="color:rgba(255,255,255,.4);font-size:.85rem;line-height:1.65">Videos de YouTube a las 2 de la mañana y bandeja que sigue sin entrar.</p></div>
         </div>
       </div>
       <div class="card">
         <div style="display:flex;gap:1.25rem">
-          <span style="color:#4ADE80;font-weight:900;font-size:.85rem;margin-top:.1rem;flex-shrink:0">03</span>
-          <div><h3 style="font-weight:700;margin-bottom:.25rem">Reír</h3><p style="color:rgba(255,255,255,.45);font-size:.9rem;line-height:1.6">Porque si no te ríes de tus propios errores, alguien lo hará por ti.</p></div>
+          <span class="font-disp" style="color:#4ADE80;font-size:.85rem;margin-top:.1rem;flex-shrink:0">03</span>
+          <div><h3 style="font-weight:700;margin-bottom:.25rem;font-size:.95rem">Reír</h3><p style="color:rgba(255,255,255,.4);font-size:.85rem;line-height:1.65">Porque si no te ríes de tus propios errores, alguien lo hará por ti.</p></div>
         </div>
       </div>
     </div>
@@ -108,72 +223,150 @@
 </section>
 
 <!-- ==================== STATS ==================== -->
-<section style="border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)">
+<section id="stats" style="border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(74,222,128,.04),transparent);pointer-events:none"></div>
   <div class="stat-grid">
-    <div style="background:#080808;padding:3rem 2rem;text-align:center">
-      <p style="font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:#4ADE80;line-height:1;margin-bottom:.5rem">247</p>
-      <p style="color:rgba(255,255,255,.4);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase">Partidos jugados</p>
-    </div>
-    <div style="background:#080808;padding:3rem 2rem;text-align:center">
-      <p style="font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:#4ADE80;line-height:1;margin-bottom:.5rem">3</p>
-      <p style="color:rgba(255,255,255,.4);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase">Raquetas rotas</p>
-    </div>
-    <div style="background:#080808;padding:3rem 2rem;text-align:center">
-      <p style="font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:#4ADE80;line-height:1;margin-bottom:.5rem">∞</p>
-      <p style="color:rgba(255,255,255,.4);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase">Bandejas falladas</p>
-    </div>
-    <div style="background:#080808;padding:3rem 2rem;text-align:center">
-      <p style="font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:#4ADE80;line-height:1;margin-bottom:.5rem">6</p>
-      <p style="color:rgba(255,255,255,.4);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase">Amigos para siempre</p>
-    </div>
+    <div class="stat-item"><p class="stat-num" data-count="247">0</p><p style="color:rgba(255,255,255,.3);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase">Partidos jugados</p></div>
+    <div class="stat-item"><p class="stat-num" data-count="3">0</p><p style="color:rgba(255,255,255,.3);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase">Raquetas rotas</p></div>
+    <div class="stat-item"><p class="stat-num">∞</p><p style="color:rgba(255,255,255,.3);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase">Bandejas falladas</p></div>
+    <div class="stat-item"><p class="stat-num" data-count="6">0</p><p style="color:rgba(255,255,255,.3);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase">Amigos para siempre</p></div>
   </div>
 </section>
 
 <!-- ==================== CREW ==================== -->
-<section style="padding:8rem 1.5rem;max-width:64rem;margin:0 auto">
-  <div style="margin-bottom:4rem">
-    <p style="color:#4ADE80;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;font-weight:500;margin-bottom:1rem">El equipo</p>
-    <h2 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:900;letter-spacing:-.03em">Conoce a la banda</h2>
+<section id="crew" style="padding:8rem 1.5rem;max-width:64rem;margin:0 auto">
+  <div class="reveal" style="margin-bottom:4rem">
+    <p class="kicker">El equipo</p>
+    <h2 class="font-disp" style="font-size:clamp(2.8rem,6vw,4.8rem);line-height:.88;text-transform:uppercase">Conoce a la banda</h2>
   </div>
-  <div class="crew-grid">
-    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">🐂</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Carlos</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"El Toro"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Potencia bruta</p><div class="progress-bar"><div class="progress-fill" style="width:79%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">89W</span></div>
-    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">🎯</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Javi</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"Revés"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Técnica cuestionable</p><div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">74W</span></div>
-    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">👑</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Marta</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"Smash Queen"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Dominadora de la red</p><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">112W</span></div>
-    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">🧱</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Pablo</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"Bolea"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Defensa imposible</p><div class="progress-bar"><div class="progress-fill" style="width:61%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">68W</span></div>
-    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">🪃</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Sofía</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"La Pared"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Recupera todo</p><div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">95W</span></div>
-    <div class="card"><div style="font-size:2.5rem;margin-bottom:1rem">🎈</div><h3 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em">Andrés</h3><p style="color:#4ADE80;font-size:.85rem;font-weight:500;margin:.25rem 0">"Lob"</p><p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:1rem">Especialista en globos</p><div class="progress-bar"><div class="progress-fill" style="width:46%"></div></div><span style="font-size:.7rem;color:rgba(255,255,255,.3)">51W</span></div>
+  <div class="crew-grid stagger">
+    <div class="card"><div class="avatar">C</div><h3 style="font-size:1.1rem;font-weight:900;line-height:1">Carlos</h3><p style="color:#4ADE80;font-size:.75rem;font-weight:600;margin:.3rem 0 .25rem;letter-spacing:.05em">"El Toro"</p><p style="color:rgba(255,255,255,.38);font-size:.85rem;margin-bottom:1.25rem">Potencia bruta</p><div style="display:flex;justify-content:space-between;font-size:.65rem;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px"><span>Victorias</span><span style="color:rgba(255,255,255,.45);font-weight:700">89</span></div><div class="progress-bar"><div class="progress-fill" style="width:79%"></div></div></div>
+    <div class="card"><div class="avatar">J</div><h3 style="font-size:1.1rem;font-weight:900;line-height:1">Javi</h3><p style="color:#4ADE80;font-size:.75rem;font-weight:600;margin:.3rem 0 .25rem;letter-spacing:.05em">"Revés"</p><p style="color:rgba(255,255,255,.38);font-size:.85rem;margin-bottom:1.25rem">Técnica cuestionable</p><div style="display:flex;justify-content:space-between;font-size:.65rem;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px"><span>Victorias</span><span style="color:rgba(255,255,255,.45);font-weight:700">74</span></div><div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div></div>
+    <div class="card"><div class="avatar">M</div><h3 style="font-size:1.1rem;font-weight:900;line-height:1">Marta</h3><p style="color:#4ADE80;font-size:.75rem;font-weight:600;margin:.3rem 0 .25rem;letter-spacing:.05em">"Smash Queen"</p><p style="color:rgba(255,255,255,.38);font-size:.85rem;margin-bottom:1.25rem">Dominadora de la red</p><div style="display:flex;justify-content:space-between;font-size:.65rem;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px"><span>Victorias</span><span style="color:rgba(255,255,255,.45);font-weight:700">112</span></div><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div>
+    <div class="card"><div class="avatar">P</div><h3 style="font-size:1.1rem;font-weight:900;line-height:1">Pablo</h3><p style="color:#4ADE80;font-size:.75rem;font-weight:600;margin:.3rem 0 .25rem;letter-spacing:.05em">"Bolea"</p><p style="color:rgba(255,255,255,.38);font-size:.85rem;margin-bottom:1.25rem">Defensa imposible</p><div style="display:flex;justify-content:space-between;font-size:.65rem;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px"><span>Victorias</span><span style="color:rgba(255,255,255,.45);font-weight:700">68</span></div><div class="progress-bar"><div class="progress-fill" style="width:61%"></div></div></div>
+    <div class="card"><div class="avatar">S</div><h3 style="font-size:1.1rem;font-weight:900;line-height:1">Sofía</h3><p style="color:#4ADE80;font-size:.75rem;font-weight:600;margin:.3rem 0 .25rem;letter-spacing:.05em">"La Pared"</p><p style="color:rgba(255,255,255,.38);font-size:.85rem;margin-bottom:1.25rem">Recupera todo</p><div style="display:flex;justify-content:space-between;font-size:.65rem;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px"><span>Victorias</span><span style="color:rgba(255,255,255,.45);font-weight:700">95</span></div><div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div></div>
+    <div class="card"><div class="avatar">A</div><h3 style="font-size:1.1rem;font-weight:900;line-height:1">Andrés</h3><p style="color:#4ADE80;font-size:.75rem;font-weight:600;margin:.3rem 0 .25rem;letter-spacing:.05em">"Lob"</p><p style="color:rgba(255,255,255,.38);font-size:.85rem;margin-bottom:1.25rem">Especialista en globos</p><div style="display:flex;justify-content:space-between;font-size:.65rem;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px"><span>Victorias</span><span style="color:rgba(255,255,255,.45);font-weight:700">51</span></div><div class="progress-bar"><div class="progress-fill" style="width:46%"></div></div></div>
   </div>
 </section>
 
 <!-- ==================== CTA ==================== -->
-<section style="padding:8rem 1.5rem;text-align:center">
-  <div style="max-width:48rem;margin:0 auto">
-    <p style="color:#4ADE80;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;font-weight:500;margin-bottom:1.5rem">¿Te atreves?</p>
-    <h2 style="font-size:clamp(2.5rem,7vw,5rem);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:2rem">
-      Crees que puedes<br><span style="color:rgba(255,255,255,.22)">seguir el ritmo?</span>
+<section id="cta" style="padding:8rem 1.5rem;text-align:center;position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 50% 50%,rgba(74,222,128,.07),transparent);pointer-events:none"></div>
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;border-radius:50%;background:rgba(74,222,128,.04);filter:blur(80px);pointer-events:none"></div>
+  <div class="reveal" style="max-width:48rem;margin:0 auto;position:relative">
+    <p style="color:#4ADE80;font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:center;gap:12px">
+      <span style="display:inline-block;width:20px;height:1px;background:#4ADE80"></span>
+      ¿Te atreves?
+      <span style="display:inline-block;width:20px;height:1px;background:#4ADE80"></span>
+    </p>
+    <h2 class="font-disp" style="font-size:clamp(3rem,9vw,6.5rem);line-height:.85;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:2rem">
+      Crees que puedes<br><span style="color:rgba(255,255,255,.18)">seguir el ritmo?</span>
     </h2>
-    <p style="color:rgba(255,255,255,.4);font-size:1.1rem;margin-bottom:3rem;line-height:1.7;max-width:36rem;margin-left:auto;margin-right:auto">
+    <p style="color:rgba(255,255,255,.38);font-size:1rem;margin-bottom:3rem;line-height:1.75;max-width:36rem;margin-left:auto;margin-right:auto">
       No hace falta que seas bueno. Hace falta que tengas ganas. Reserva una pista y demuéstralo.
     </p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-      <button class="btn-primary">Únete al crew</button>
+      <button class="btn-primary">
+        Únete al crew
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </button>
       <button class="btn-secondary">Ver próximas pistas</button>
     </div>
   </div>
 </section>
 
 <!-- ==================== FOOTER ==================== -->
-<footer style="padding:3rem 1.5rem;border-top:1px solid rgba(255,255,255,.08)">
-  <div style="max-width:64rem;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
-    <span style="font-size:1.25rem;font-weight:900;letter-spacing:-.03em">SMASH<span style="color:#4ADE80">CREW</span></span>
-    <p style="color:rgba(255,255,255,.22);font-size:.85rem">© 2025 — Hecho con amor y bandeja fallada</p>
-    <div style="display:flex;gap:1.5rem">
-      <a href="#" style="color:rgba(255,255,255,.3);font-size:.9rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.3)'">Instagram</a>
-      <a href="#" style="color:rgba(255,255,255,.3);font-size:.9rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.3)'">WhatsApp</a>
-      <a href="#" style="color:rgba(255,255,255,.3);font-size:.9rem;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.3)'">Reservar</a>
+<footer style="border-top:1px solid rgba(255,255,255,.08);background:#050505">
+  <div style="max-width:64rem;margin:0 auto;padding:4rem 1.5rem">
+    <div class="foot-grid" style="margin-bottom:3.5rem">
+      <div>
+        <span class="font-disp" style="font-size:1.5rem;text-transform:uppercase;display:block;margin-bottom:.75rem">
+          SMASH<span style="color:#4ADE80">CREW</span>
+        </span>
+        <p style="color:rgba(255,255,255,.3);font-size:.875rem;line-height:1.7;max-width:220px">
+          Un grupo de amigos con más actitud que talento. Desde 2022.
+        </p>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:1.25rem">
+          <span style="width:6px;height:6px;border-radius:50%;background:#4ADE80;display:inline-block;animation:pulse 2s infinite"></span>
+          <span style="color:rgba(255,255,255,.22);font-size:.75rem">Próxima pista: Sábado</span>
+        </div>
+      </div>
+      <div>
+        <span class="foot-label">Navegar</span>
+        <a href="#nosotros" class="foot-link">Nosotros</a>
+        <a href="#crew" class="foot-link">El Crew</a>
+        <a href="#stats" class="foot-link">Stats</a>
+        <a href="#cta" class="foot-link">Únete</a>
+      </div>
+      <div>
+        <span class="foot-label">Síguenos</span>
+        <a href="#" class="foot-link foot-link-green">Instagram</a>
+        <a href="#" class="foot-link foot-link-green">WhatsApp</a>
+        <a href="#" class="foot-link foot-link-green">Reservar pista</a>
+      </div>
+    </div>
+    <div style="padding-top:2rem;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem">
+      <p style="color:rgba(255,255,255,.18);font-size:.75rem">© 2025 SMASH CREW — Hecho con amor y bandeja fallada</p>
+      <p style="color:rgba(255,255,255,.18);font-size:.75rem">We Ball Different ™</p>
     </div>
   </div>
 </footer>
+
+<!-- ==================== INTERACTIONS ==================== -->
+<script>
+// Navbar scroll
+const navbar = document.getElementById('navbar')
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60)
+}, { passive: true })
+
+// Mobile menu
+const burger = document.getElementById('burger')
+const mobileMenu = document.getElementById('mobileMenu')
+burger.addEventListener('click', () => {
+  burger.classList.toggle('open')
+  mobileMenu.classList.toggle('open')
+})
+function closeMenu() {
+  burger.classList.remove('open')
+  mobileMenu.classList.remove('open')
+}
+
+// Scroll reveals
+const revealEls = document.querySelectorAll('.reveal, .stagger')
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); revealObs.unobserve(e.target) } })
+}, { threshold: 0.12 })
+revealEls.forEach(el => revealObs.observe(el))
+
+// Stat count-up
+const statSection = document.getElementById('stats')
+let statsDone = false
+const statsObs = new IntersectionObserver(([e]) => {
+  if (!e.isIntersecting || statsDone) return
+  statsDone = true
+  statsObs.disconnect()
+  document.querySelectorAll('.stat-num[data-count]').forEach((el, i) => {
+    const target = +el.dataset.count
+    setTimeout(() => {
+      const dur = 1400, start = performance.now()
+      const tick = now => {
+        const p = Math.min((now - start) / dur, 1)
+        const eased = 1 - Math.pow(1 - p, 3)
+        el.textContent = Math.round(eased * target)
+        if (p < 1) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }, i * 120)
+  })
+}, { threshold: 0.3 })
+statsObs.observe(statSection)
+
+// Pulse animation (for dots)
+const style = document.createElement('style')
+style.textContent = '@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}'
+document.head.appendChild(style)
+</script>
 
 <!-- ==================== 3D ENGINE ==================== -->
 <script>
@@ -181,6 +374,7 @@
   const canvas = document.getElementById('hero-canvas')
   const scrollDriver = document.getElementById('scroll-driver')
   const titleBlock = document.getElementById('title-block')
+  const eyebrow = document.getElementById('eyebrow')
   const subtitle = document.getElementById('subtitle')
   const scrollHint = document.getElementById('scroll-hint')
   const assemblingText = document.getElementById('assembling-text')
@@ -376,7 +570,6 @@
     const t = performance.now() / 1000
     const s = scrollProgress
 
-    // Compute explode factor
     let explodeT = 0, scale = 1
 
     if (s < 0.06) {
@@ -401,13 +594,12 @@
 
     applyLerp(frameMesh, 'frame', explodeT)
     applyLerp(handleMesh, 'handle', explodeT)
-    applyLerp(gripMesh, 'handle', explodeT) // grip follows handle
+    applyLerp(gripMesh, 'handle', explodeT)
     applyLerp(faceTL, 'faceTL', explodeT)
     applyLerp(faceTR, 'faceTR', explodeT)
     applyLerp(faceBL, 'faceBL', explodeT)
     applyLerp(faceBR, 'faceBR', explodeT)
 
-    // Snow
     if (snowLive) {
       snowTime += delta
       for (let i=0; i<SNOW; i++) {
@@ -423,8 +615,12 @@
 
     // UI overlays
     const titleOpacity = s < 0.05 ? s/0.05 : s < 0.08 ? 1 : Math.max(0, 1-(s-0.08)/0.06)
+    const subtitleOpacity = s < 0.04 ? 0 : s < 0.08 ? (s-0.04)/0.04 : titleOpacity
+
     titleBlock.style.opacity = titleOpacity
     titleBlock.style.transform = `translateY(${(1-titleOpacity)*20}px)`
+    eyebrow.style.opacity = subtitleOpacity
+    subtitle.style.opacity = subtitleOpacity
     scrollHint.style.opacity = s < 0.03 ? s/0.03 : s > 0.08 ? 0 : 1-(s-0.03)/0.05
 
     const assT = s > 0.44 && s < 0.72 ? Math.min(1, Math.min((s-0.44)/0.06,(0.72-s)/0.06)) : 0
